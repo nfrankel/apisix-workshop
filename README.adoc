@@ -98,7 +98,7 @@ The following command creates a sample Route:
 ====
 [source,bash]
 ----
-include::../cmds/1_create_route.sh[]
+include::./commands/1_create_route.sh[]
 ----
 ====
 
@@ -130,7 +130,7 @@ Apache APISIX should forward the request to http://httpbin.org:80/anything/foo?a
 ====
 [source,bash]
 ----
-include::../cmds/2_created_route_test.sh[]
+include::./commands/2_created_route_test.sh[]
 ----
 ====
 
@@ -152,7 +152,7 @@ With the help of the https://apisix.apache.org/docs/apisix/architecture-design/u
 ====
 [source,bash]
 ----
-include::../cmds/3_create_upstream.sh[]
+include::./commands/3_create_upstream.sh[]
 ----
 ====
 
@@ -177,7 +177,7 @@ Now, let's bind a Route for it.
 ====
 [source,bash]
 ----
-include::../cmds/4_bind_route_to_upstream.sh[]
+include::./commands/4_bind_route_to_upstream.sh[]
 ----
 ====
 
@@ -200,7 +200,7 @@ Now is time to test our configuration.
 ====
 [source,bash]
 ----
-include::../cmds/5_bind_route_to_upstream_test.sh[]
+include::./commands/5_bind_route_to_upstream_test.sh[]
 ----
 ====
 
@@ -348,7 +348,7 @@ To prove it, let's move back to the terminal and run below curl command.
 ====
 [source,bash]
 ----
-include::../cmds/6_authentication_enable_failed_test.sh[]
+include::./commands/6_authentication_enable_failed_test.sh[]
 ----
 ====
 
@@ -376,7 +376,7 @@ We can retry the same request with the authentication key.
 ====
 [source,bash]
 ----
-include::../cmds/7_authentication_enable_success_test.sh[]
+include::./commands/7_authentication_enable_success_test.sh[]
 ----
 ====
 
@@ -449,7 +449,7 @@ We update the existing `Consumer` plugin config with JWT-related configuration:
 ====
 [source,bash]
 ----
-include::../cmds/8_update_consumer_jwt_credentials.sh[]
+include::./commands/8_update_consumer_jwt_credentials.sh[]
 ----
 ====
 
@@ -486,7 +486,7 @@ We can now add the `jwt-auth` plugin to the Route we have created previously:
 ====
 [source,bash]
 ----
-include::../cmds/8_add_jwt_plugin_to_route.sh[]
+include::./commands/8_add_jwt_plugin_to_route.sh[]
 ----
 ====
 
@@ -536,7 +536,7 @@ First, you need to set up the route for the API that signs the token, which will
 ====
 [source,bash]
 ----
-include::../cmds/8_jwt_plugin_enable_public-api-plugin.sh[]
+include::./commands/8_jwt_plugin_enable_public-api-plugin.sh[]
 ----
 ====
 
@@ -570,7 +570,7 @@ Then, run the following command to generate a new JWT token:
 ====
 [source,bash]
 ----
-include::../cmds/8_jwt_plugin_generate_token.sh[]
+include::./commands/8_jwt_plugin_generate_token.sh[]
 ----
 ====
 
@@ -595,7 +595,7 @@ We can use the newly-generated token to authenticate our next request:
 ====
 [source,bash]
 ----
-include::../cmds/8_jwt_plugin_in_use.sh[]
+include::./commands/8_jwt_plugin_in_use.sh[]
 ----
 ====
 
@@ -620,7 +620,7 @@ If you try to access the same endpoint without a token in the Header request, yo
 ====
 [source,bash]
 ----
-include::../cmds/8_jwt_plugin_failure_example.sh[]
+include::./commands/8_jwt_plugin_failure_example.sh[]
 ----
 ====
 
@@ -986,7 +986,7 @@ To http-logger settings, we can just put our mock server uri address like below:
 ====
 [source,bash]
 ----
-include::../cmds/9_http_logger_plugin_enable.sh[]
+include::./commands/9_http_logger_plugin_enable.sh[]
 ----
 ====
 
@@ -1591,7 +1591,7 @@ We can setup new route with our new plugin enabled.
 ====
 [source,bash]
 ----
-include::../cmds/14_custom_file_logger_plugin_enable.sh[]
+include::./commands/14_custom_file_logger_plugin_enable.sh[]
 ----
 ====
 
