@@ -46,7 +46,7 @@ For reference purposes, plugins are grouped into categories: general, transforma
 
 == The infrastructure
 
-The whole workshop is hosted on a https://github.com/nfrankel/apisix-workshop/[GitHub repository^].
+The workshop is hosted on a https://github.com/nfrankel/apisix-workshop/[GitHub repository^].
 At the root of the repository is a `docker-compose.yml` file that defines the infrastructure.
 
 Clone the repository:
@@ -74,20 +74,16 @@ Once everything is started, we can run a simple `curl` command to check if APISI
 
 [source,bash]
 ----
-curl "http://localhost:9180/apisix/admin/services/" -H 'X-API-KEY: edd1c9f034335f136f87ad84b625c8f1'
+curl http://localhost:9180/apisix/admin/services -H 'X-API-KEY: edd1c9f034335f136f87ad84b625c8f1'
 ----
 
 == Create a Route
 
-Now we have a running instance of Apache APISIX. Next, let’s create a
-Route.
+As we have a running instance of Apache APISIX, we can create a Route.
 
 === How it works
 
-Apache APISIX is based on a couple of primitives:
-
-* One of them is the https://apisix.apache.org/docs/apisix/architecture-design/route/[Route^]
-* Another is the https://apisix.apache.org/docs/apisix/architecture-design/upstream/[Upstream^]
+We learned above that Apache APISIX offers a couple of abstractions: upstreams and routes.
 
 We can create a Route and configure the underlying Upstream. 
 When Apache APISIX receives a request matching the Route, it forwards it to the underlying Upstream.
