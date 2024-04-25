@@ -14,9 +14,9 @@ jobs:
       - name: Install Asciidoctor
         run: sudo apt-get install -y asciidoctor
       - name: Build HTML
-        run: asciidoctor -D pages -o index.html README.adoc
-      - name: Move images
-        run: mv images pages/images
+        run: asciidoctor -D pages -o index.html -a imagesdir=. README.adoc
+      - name: Prevent GitHub from building with Jekyll
+        run: touch pages/.nojekyll
       - name: Publish to GitHub pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
