@@ -3,6 +3,7 @@ Nicolas Fränkel
 :toc:
 :icons: font
 :experimental: true
+:imagesdir: ./images
 
 [NOTE]
 ====

@@ -15,6 +15,8 @@ jobs:
         run: sudo apt-get install -y asciidoctor
       - name: Build HTML
         run: asciidoctor -D pages -o index.html README.adoc
+      - name: Move images
+        run: mv images pages/images
       - name: Publish to GitHub pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
