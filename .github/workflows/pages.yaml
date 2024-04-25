@@ -1,0 +1,23 @@
+name: Generate and publish GitHub Pages
+
+on:
+  push:
+    branches:
+      - master
+jobs:
+  github-pages:
+    runs-on: ubuntu-latest
+    name: Build Asciidoc
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Install Asciidoctor
+        run: sudo apt-get install -y asciidoctor
+      - name: Build HTML
+        run: asciidoctor -D pages -o index.html README.adoc
+      - name: Publish to GitHub pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: pages
+          single-commit: true
+          branch: github-pages
