@@ -3,6 +3,7 @@ Nicolas Fränkel
 :toc:
 :icons: font
 :experimental: true
+:sectnums:
 :imagesdir: ./pages
 
 [NOTE]
@@ -10,8 +11,6 @@ Nicolas Fränkel
 The workshop was initially designed by Bobur Umurzukov with my help.
 Thanks for all his hard work!
 ====
-
-== Welcome
 
 Welcome to this workshop on https://apisix.apache.org/[Apache APISIX^]!
 
@@ -27,25 +26,45 @@ In this session, we will to show a couple of APISIX's nifty features that can he
 
 The workshop is designed to be self-driven, but if at any point, you need help, just ask the instructor for help.
 
-== Pre-requisites
+== Overview
 
-* You need a way to run https://www.docker.com/[Docker^] and Docker Compose files.
+This section explains the context of the workshop.
+If you prefer, you can directly skip to the link:#prerequisites[hands-on part].
+
+https://apisix.apache.org/[Apache APISIX^] is an API Gateway steered by the Apache Foundation.
+
+When you expose your services to the outside world, a lot of bad things can happen.
+For instance, a malicious actor could try to access your services without permission.
+Or they could try to access your services with invalid data.
+Or they could try to overload your services with too many requests.
+
+You need to protect your services.
+However, it doesn't make any sense to let each developer team handle these requirements on each service.
+The age-old solution is to hide your services behind a _reverse proxy_:
+the reverse proxy is the single point of entry to your information system and protects your services.
+https://www.nginx.com/[nginx^] is a solid and mature reverse-proxy.
+
+Because they were designed before APIs, reverse proxies have a big issue:
+they don't differentiate between clients.
+For example, to protect agains +++<abbr title="Distributed Denial of Service">DDoS</abbr>+++ attacks, they can limit the number of requests for all clients.
+Some may even allow to configure different limits for different IP addresses (or ranges).
+However, API providers probably offer different quotas at different prices.
+A single customer may want to subscribe to two different offers, for two different departments with different requirements - and different budgets.
+
+That's where API Gateways enter the field.
+An API Gateway is a reverse proxy "on steroids".
+It should do everything a reverse proxy does, and more, especially in the context of APIs.
+
+== Laying out the workshop
+
+* This workshops is based on Docker Compose.
+You need a way to run https://www.docker.com/[Docker^] and Docker Compose files.
 Docker Dashboard works.
 If you want to use something else, please do it but the instructor probably won't be able to help you if there's an issue.
 * We use the https://curl.se/docs/manpage.html[curl^] command for API testing.
 You can also use other tools such as Postman for testing.
 
-== Abstractions
-
-We should first familiarize ourselves with a couple of core concepts offeres by APISIX.
-
-* https://apisix.apache.org/docs/apisix/architecture-design/upstream/[Upstream^] represents a backend service from the Apache APISIX point of view.
-* https://apisix.apache.org/docs/apisix/architecture-design/route/[Route^] is the most important concept; it instructs APISIX to forward traffic to the correct upstream based on the request.
-* APISIX is build on top of a plugin architecture.
-Every feature (authentication, authorization, etc.) is a https://apisix.apache.org/docs/apisix/architecture-design/plugin/[Plugin^].
-For reference purposes, plugins are grouped into categories: general, transformation, authentication, security, traffic control, observability, serverless, and other protocols.
-
-== The infrastructure
+=== The infrastructure
 
 The workshop is hosted on a https://github.com/nfrankel/apisix-workshop/[GitHub repository^].
 At the root of the repository is a `docker-compose.yml` file that defines the infrastructure.
@@ -78,16 +97,25 @@ Once everything is started, we can run a simple `curl` command to check if APISI
 curl http://localhost:9180/apisix/admin/services -H 'X-API-KEY: edd1c9f034335f136f87ad84b625c8f1'
 ----
 
-== Create a Route
+=== Just enough abstractions
 
-As we have a running instance of Apache APISIX, we can create a Route.
+We should first familiarize ourselves with a couple of core concepts offeres by APISIX.
 
-=== How it works
+* https://apisix.apache.org/docs/apisix/architecture-design/upstream/[Upstream^] represents a backend service from the Apache APISIX point of view.
+* https://apisix.apache.org/docs/apisix/architecture-design/route/[Route^] is the most important concept; it instructs APISIX to forward traffic to the correct upstream based on the request.
+* APISIX is build on top of a plugin architecture.
+Every feature (authentication, authorization, etc.) is a https://apisix.apache.org/docs/apisix/architecture-design/plugin/[Plugin^].
+For reference purposes, plugins are grouped into categories: general, transformation, authentication, security, traffic control, observability, serverless, and other protocols.
 
-We learned above that Apache APISIX offers a couple of abstractions: upstreams and routes.
+== First steps
 
-We can create a Route and configure the underlying Upstream. 
-When Apache APISIX receives a request matching the Route, it forwards it to the underlying Upstream.
+We learned above about abstractions that Apache APISIX offers.
+In this section, we will create the most basic one, the `Route`.
+When Apache APISIX receives a request matching the `Route`, it forwards it to the embedded upstream.
+
+=== Dynamic configuration vs. static configuration
+
+
 
 === Route Configuration
 
