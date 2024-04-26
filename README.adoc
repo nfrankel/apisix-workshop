@@ -93,7 +93,7 @@ Once everything is started, we can run a simple `curl` command to check if APISI
 
 [source,bash]
 ----
-curl http://localhost:9180/apisix/admin/services -H 'X-API-KEY: edd1c9f034335f136f87ad84b625c8f1'
+curl http://localhost:9180/apisix/admin/routes -H 'X-API-KEY: edd1c9f034335f136f87ad84b625c8f1'
 ----
 
 Don't worry about the command for now.
@@ -111,7 +111,7 @@ When Apache APISIX receives a request matching the `Route` parameters, it forwar
 
 === Dynamic configuration vs. static configuration
 
-[NOTE]:
+[NOTE]
 ====
 In the context of APISIX, configuration can mean two things:
 configuration of APISIX itself or configuration of its routing rules.
@@ -137,11 +137,11 @@ The goal is to create a `Route` that forwards requests to the `httpbin` service,
 curl localhost:9080/anything
 ----
 
-Read the documentation about https://apisix.apache.org/docs/apisix/getting-started/configure-routes/[Route configuration^] and create the `Route` for the above requirement.
+Read the https://apisix.apache.org/docs/apisix/getting-started/configure-routes/[documentation^] and create the `Route` for the above requirement.
 
 If you cannot proceed further or when you are finished, reveal the hint:
 
-.See the command
+.See the solution
 [%collapsible]
 ====
 [source,bash]
@@ -175,12 +175,7 @@ curl http://localhost:9080/anything
 Astute readers might have noticed that the Admin API runs on port `9180` while the Gateway operates on port `9080`.
 It allows to expose the latter to the outside world while keeping the former private for security reasons.
 
-[INFO]
-====
-Apache APISIX Admin API provides a RESTful interface for the administration and configuration of Upstreams, Routes, Plugins, and Consumers. All the tasks you can perform against the Gateway can be automated using the https://apisix.apache.org/docs/apisix/admin-api[Admin API].
-====
-
-=== Create an `Upstream
+=== Create an `Upstream`
 
 In the previous section, we created a `Route` with an embedded `Upstream`.
 The problem with this approach is that you need to define the same `Upstream` in all the `Route` objects that use it.
@@ -189,7 +184,7 @@ We can create an `Upstream` once and reference it throughout multiple `Route` ob
 
 The Apache APISIX API is consistent:
 the API for `Upstream` is similar to the API for `Route`.
-With the help of the https://apisix.apache.org/docs/apisix/admin-api/#upstream-api[Upstream documentation^] and the command used to create the Route above, create an `Upstream` with the following properties:
+With the help of the https://apisix.apache.org/docs/apisix/admin-api/#upstream-api[documentation^] and the command used to create the Route above, create an `Upstream` with the following properties:
 
 * ID: `1`
 * Single node
@@ -210,7 +205,7 @@ You can configure the `Upstream` with additional properties like health check, r
 
 In the previous section, we created an `Upstream` that referenced our backend service.
 It can be referenced by `upstream_id` in a `Route`.
-Create a new `Route` that references it.
+Create a new `Route` that references it with the help of the https://apisix.apache.org/docs/apisix/admin-api/#route-api[documentation^].
 
 .See the command
 [%collapsible]
@@ -219,11 +214,11 @@ Create a new `Route` that references it.
 ----
 include::{commandsdir}/3_bind_route_to_upstream.sh[]
 ----
-====
 
 <1> We use the same id `1` as above, so we are replacing the previous `Route` with this one
 <2> Match the `/anything*` path as before
 <3> Forwards to the `Upstream` defined above
+====
 
 Let's test:
 
@@ -243,10 +238,23 @@ Along with the Admin API, Apache APISIX offers a Dashboard.
 The https://github.com/apache/apisix-dashboard[Apache APISIX Dashboard^] is designed to make it as easy as possible for users to configure Apache APISIX via a +++<abbr title="Graphical User Interface">GUI</abbr>+++.
 You can find more information about the APISIX Dashboard in the https://apisix.apache.org/docs/dashboard/USER_GUIDE[user guide^].
 
-If you have time, the Getting started with Apache APISIX Dashboard video tutorial is a good introduction to the dashboard.
+If you have time, the Getting started with Apache APISIX Dashboard video tutorial is a good introduction to the dashboard:
 
 [.text-center]
 video::-9-HZKK2ccI[youtube,width=840,height=470]
+
+[IMPORTANT]
+====
+The dashboard execute HTTP API calls under the cover.
+You can verify this claim by interacting with the dashboard with your favorite's browser tools enabled.
+Hence, whatever we do with the dashboard, we can do with the Admin API.
+
+The reverse is not true:
+the dashboard doesn't cover every possible API call.
+====
+
+In this section, we are going to set up authentication for our requests to `httpbin`.
+Rememember that though the backend service could implement it, it's more efficient to factor this feature in the API Gateway than to implement it in every service.
 
 === Display the existing objects
 
@@ -268,8 +276,23 @@ Likewise, the dashboard displays our `Upstream`.
 
 image::dashboard-list-upstream.png[]
 
+=== Add a new `Consumer`
 
-=== Add a new Consumer
+Authentication is tied to an identity.
+In Apache APISIX, we call an identity a `Consumer`.
+On the dashboard, display the existing `Consumer` objects by clicking on the btn:[Consumer] menu item on the left side:
+there should be none.
+
+Click on btn:[Create].
+
+image::dashboard-create-new-consumer.png[]
+
+In the next screen, give the new `Consumer` a name, _e.g._, `johndoe`.
+
+image::dashboard-consumer-detail.png[]
+
+Click btn:[Next] until the end of the wizard.
+The new `Consumer` should now appear in the list.
 
 .Try it yourself
 [%collapsible]
@@ -304,11 +327,6 @@ login with default credentials `admin`/`admin`.
 12. On the *Routes* page, you can see the new route and click btn:[View] to see Raw data of configuration.
 
 ====
-[NOTE]
-====
-We can achieve the same configuration result with the +++<abbr title="Command-Line Interface">CLI</abbr>+++ as with the Dashboard.
-Indeed, the Dashboard sends HTTP requests to Apache APISIX.
-====
 
 The Route we have created is public.
 Thus, anyone can access the underlying Upstream as long as they know the endpoint Apache APISIX exposes to the outside world.
@@ -336,13 +354,6 @@ image::key-auth-plugin-switch-on.png[]
 
 Then press btn:[Submit] to save changes, click btn:[Next] and after btn:[Submit]
 to update route configs.
-
-Second, go to btn:[Consumer] page from the navigation bar and click on btn:[Create], then give the Consumer a name, e.g., `Example Consumer`.
-Click btn:[Next].
-
-image::create-new-consumer-screenshot.png[]
-
-image::consumer-detail-screenshot.png[]
 
 === Enable key-auth plugin
 
