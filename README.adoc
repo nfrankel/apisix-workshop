@@ -5,6 +5,7 @@ Nicolas Fränkel
 :experimental: true
 :sectnums:
 :imagesdir: ./pages
+:commandsdir: ./commands
 
 [NOTE]
 ====
@@ -16,8 +17,8 @@ Welcome to this workshop on https://apisix.apache.org/[Apache APISIX^]!
 
 In this session, we will to show a couple of APISIX's nifty features that can help your information system cope with the challenges introduced by APIs:
 
-* Routing your calls to the correct upstream
-* Available abstractions: Route, Upstream, Service
+* Routing your calls to an `Upstream`
+* Available abstractions: `Route`, `Upstream`, `Consumer`, and `Plugin`
 * The Apache APISIX dashboard
 * Configuring APISIX with the dashboard
 * Configuring APISIX with the command-line
@@ -60,11 +61,9 @@ It should do everything a reverse proxy does, and more, especially in the contex
 * This workshops is based on Docker Compose.
 You need a way to run https://www.docker.com/[Docker^] and Docker Compose files.
 Docker Dashboard works.
-If you want to use something else, please do it but the instructor probably won't be able to help you if there's an issue.
+If you want to use something else, please feel free to do so but if something doesn't work because of it, know that it decreases your chances that the instructor probably can help you with it.
 * We use the https://curl.se/docs/manpage.html[curl^] command for API testing.
 You can also use other tools such as Postman for testing.
-
-=== The infrastructure
 
 The workshop is hosted on a https://github.com/nfrankel/apisix-workshop/[GitHub repository^].
 At the root of the repository is a `docker-compose.yml` file that defines the infrastructure.
@@ -97,162 +96,180 @@ Once everything is started, we can run a simple `curl` command to check if APISI
 curl http://localhost:9180/apisix/admin/services -H 'X-API-KEY: edd1c9f034335f136f87ad84b625c8f1'
 ----
 
-=== Just enough abstractions
+Don't worry about the command for now.
+It should return something similar to:
 
-We should first familiarize ourselves with a couple of core concepts offeres by APISIX.
-
-* https://apisix.apache.org/docs/apisix/architecture-design/upstream/[Upstream^] represents a backend service from the Apache APISIX point of view.
-* https://apisix.apache.org/docs/apisix/architecture-design/route/[Route^] is the most important concept; it instructs APISIX to forward traffic to the correct upstream based on the request.
-* APISIX is build on top of a plugin architecture.
-Every feature (authentication, authorization, etc.) is a https://apisix.apache.org/docs/apisix/architecture-design/plugin/[Plugin^].
-For reference purposes, plugins are grouped into categories: general, transformation, authentication, security, traffic control, observability, serverless, and other protocols.
+[source,json]
+----
+{"list":[],"total":0}
+----
 
 == First steps
 
-We learned above about abstractions that Apache APISIX offers.
-In this section, we will create the most basic one, the `Route`.
-When Apache APISIX receives a request matching the `Route`, it forwards it to the embedded upstream.
+In this section, we will create the most basic object in APISIX, the `Route`.
+When Apache APISIX receives a request matching the `Route` parameters, it forwards it to the configured service.
 
 === Dynamic configuration vs. static configuration
 
+[NOTE]:
+====
+In the context of APISIX, configuration can mean two things:
+configuration of APISIX itself or configuration of its routing rules.
+The workshop has taken care of the former, so you can learn about the latter.
+====
 
+Apache APISIX offers two configuration models.
+By default, it uses a dynamic one:
+to configure routing rules, you send HTTP requests to the _Admin API_.
+Another option is to use static configuration based on a YAML file.
+It's the way for GitOps-based organizations.
 
-=== Route Configuration
+In this workshop, we will focus on dynamic configuration, _i.e._, HTTP calls.
 
-The following command creates a sample Route:
+=== Our first `Route`
+
+In this section, we will create our first `Route`.
+The Docker Compose file defines an `httpbin` service so you don't need Internet access.
+The goal is to create a `Route` that forwards requests to the `httpbin` service, in particular:
+
+[source,bash]
+----
+curl localhost:9080/anything
+----
+
+Read the documentation about https://apisix.apache.org/docs/apisix/getting-started/configure-routes/[Route configuration^] and create the `Route` for the above requirement.
+
+If you cannot proceed further or when you are finished, reveal the hint:
 
 .See the command
 [%collapsible]
 ====
 [source,bash]
 ----
-include::./commands/1_create_route.sh[]
+include::{commandsdir}/1_create_route.sh[]
 ----
-====
 
-<1> The configuration of Apache APISIX objects is handled via a REST API
-<2> The `/apisix/admin/routes` endpoint manages Routes
-<3> Because configuration is a highly critical feature, we need to authenticate via an API key.
+<1> The `/apisix/admin/routes` endpoint manages `Route` objects.
+<2> Because configuration is a highly critical feature, we need to authenticate via an API key.
 Here, we use the default one.
 It's highly advised to generate your own, and regularly change it.
-To update your Admin API token, please refer to https://apisix.apache.org/docs/apisix/how-to-build#step-5-update-admin-api-token-to-secure-apache-apisix[this guide^].
-<4> HTTP method matching the newly-defined route
-<5> Host matching the newly-defined route
-<6> URI matching the newly-defined route.
-Notice the star character:
-every URI starting with `/anything/` matches.
-<7> Upstream defined at the same time as the Route.
-Upstream references a cluster of nodes, which you can balance load across, depending on some algorithm.
-Here, we have a single Upstream, so we can use any algorithm.
+<3> APISIX can match on several parameters:
+host, HTTP method(s), path, and client IP addresses.
+Only the path is required.
+If methods are not specified, it matches all methods.
+<4> Notice the star character:
+every URI starting with `/anything/` matches the `Route`.
+<5> `Upstream` defined embedded in the `Route`.
+An `Upstream` references a cluster of nodes, which you can load balance across, depending on an algorithm.
+The default algorithm is _round robbin_.
+Here, we have a single `Upstream`.
+====
+
+At this point, we can check whether the configuration works:
+
+[source,bash]
+----
+curl http://localhost:9080/anything
+----
+
+Astute readers might have noticed that the Admin API runs on port `9180` while the Gateway operates on port `9080`.
+It allows to expose the latter to the outside world while keeping the former private for security reasons.
 
 [INFO]
 ====
 Apache APISIX Admin API provides a RESTful interface for the administration and configuration of Upstreams, Routes, Plugins, and Consumers. All the tasks you can perform against the Gateway can be automated using the https://apisix.apache.org/docs/apisix/admin-api[Admin API].
 ====
 
-Once we have created the Route, we can check whether it works.
-Apache APISIX should forward the request to http://httpbin.org:80/anything/foo?arg=10.
+=== Create an `Upstream
 
-.See the command
-[%collapsible]
-====
-[source,bash]
-----
-include::./commands/2_created_route_test.sh[]
-----
-====
+In the previous section, we created a `Route` with an embedded `Upstream`.
+The problem with this approach is that you need to define the same `Upstream` in all the `Route` objects that use it.
+APISIX offers a better way to manage this: the `Upstream` object.
+We can create an `Upstream` once and reference it throughout multiple `Route` objects.
 
-== Create an Upstream
-
-In the previous paragraph, we created a Route that defined its Upstream.
-It's also possible to create an Upstream once and reference it in multiple Routes.
-
-Apache APISIX API is consistent.
-The Upstream API is similar to the Route's.
-With the help of the https://apisix.apache.org/docs/apisix/architecture-design/upstream/[Upstream documentation^] and the command used to create the Route above, create an Upstream with the following properties:
+The Apache APISIX API is consistent:
+the API for `Upstream` is similar to the API for `Route`.
+With the help of the https://apisix.apache.org/docs/apisix/admin-api/#upstream-api[Upstream documentation^] and the command used to create the Route above, create an `Upstream` with the following properties:
 
 * ID: `1`
 * Single node
-* The node points to httpbin.org:80
+* The node points to `httpbin:80`
 
 .See the solution
 [%collapsible]
 ====
 [source,bash]
 ----
-include::./commands/3_create_upstream.sh[]
+include::{commandsdir}/2_create_upstream.sh[]
 ----
 ====
 
-Also, you can configure the Upstream with additional properties like
-health check, retries, retry timeout or load-balancing to multiple systems.
+You can configure the `Upstream` with additional properties like health check, retries, retry timeout or load-balancing to multiple systems.
 
-[INFO]
-====
-You can learn more about other Admin API Upstream request methods
-https://apisix.apache.org/docs/apisix/admin-api#:~:text=Back%20to%20TOC-,Upstream,-%23[here^].
-====
+=== Bind the `Route` to the `Upstream`
 
-== Bind the Route to the Upstream
-
-In the above section, we created an Upstream (referencing our backend).
-It can be referenced by `upstream_id` in a specific Route or Service.
-
-Now, let's bind a Route for it.
+In the previous section, we created an `Upstream` that referenced our backend service.
+It can be referenced by `upstream_id` in a `Route`.
+Create a new `Route` that references it.
 
 .See the command
 [%collapsible]
 ====
 [source,bash]
 ----
-include::./commands/4_bind_route_to_upstream.sh[]
+include::{commandsdir}/3_bind_route_to_upstream.sh[]
 ----
 ====
 
-In the Route request body, we are specifying following:
+<1> We use the same id `1` as above, so we are replacing the previous `Route` with this one
+<2> Match the `/anything*` path as before
+<3> Forwards to the `Upstream` defined above
 
-<1> Any requests to path `"/get"`
-<2> Host that matches domain name `"httpbin.org"`
-<3> Will be forwarded to the upstream target (backend service) instead of the host.
-For the purposes of our example, the upstream will point to target, _httpbin.org_. In a real environment, the upstream will point to the same service running on multiple systems.
+Let's test:
 
-By creating an Upstream object and referencing it by upstream_id in the Route, you can ensure that there is only a single value of the object that needs to be maintained.
-
-=== Validation
-
-At this point, we have created a Route and an Upstream and bound them together.
-Now is time to test our configuration.
-
-.See the command
-[%collapsible]
-====
 [source,bash]
 ----
-include::./commands/5_bind_route_to_upstream_test.sh[]
+curl localhost:9080/anything/goes
 ----
-====
 
-It should return the expected data from the configured Upstream.
+It should return the expected data from the configured `Upstream`.
 
-== APISIX Dashboard
+`Upstream` objects are a powerful abstraction in Apache APISIX.
+They allow to define a single object across multiple `Route` objects so that there is only a single `Upstream` that needs to be maintained.
 
-Apache APISIX is the first Open source API gateway, with a built-in low-code Dashboard offering a powerful and flexible interface for developers to use.
+== The APISIX Dashboard
 
-The https://github.com/apache/apisix-dashboard[Apache APISIX Dashboard] is designed to make it as easy as possible for users to operate Apache APISIX through a frontend interface.
+Along with the Admin API, Apache APISIX offers a Dashboard.
+The https://github.com/apache/apisix-dashboard[Apache APISIX Dashboard^] is designed to make it as easy as possible for users to configure Apache APISIX via a +++<abbr title="Graphical User Interface">GUI</abbr>+++.
+You can find more information about the APISIX Dashboard in the https://apisix.apache.org/docs/dashboard/USER_GUIDE[user guide^].
 
-You can find more information about APISIX Dashboard in the https://apisix.apache.org/docs/dashboard/USER_GUIDE[user guide^].
+If you have time, the Getting started with Apache APISIX Dashboard video tutorial is a good introduction to the dashboard.
 
-[TIP]
-====
-A https://youtu.be/-9-HZKK2ccI[Getting started with Apache APISIX Dashboard^] video tutorial is available.
-It demos the same features we achieve here via the +++<abbr title="Command-Line Interface">CLI</abbr>+++.
-====
+[.text-center]
+video::-9-HZKK2ccI[youtube,width=840,height=470]
+
+=== Display the existing objects
+
+So far, we created a `Route` and an `Upstream` via the +++<abbr title="Command-Line Interface">CLI </abbr>+++.
+We can see the result of our work on the dashboard.
+It's accessible at <http://localhost:9000/>.
+The credentials are `admin`/`admin` by default.
+
+[.text-center]
+image::dashboard-login.png[]
+
+After logging, go to btn:[Route] in the navigation bar on the left side.
+In the `Route` list, we can see the `Route` we created previously.
+
+image::dashboard-list-routes.png[]
+
+Next, navigate to btn:[Upstream].
+Likewise, the dashboard displays our `Upstream`.
+
+image::dashboard-list-upstream.png[]
+
 
 === Add a new Consumer
-
-We created a new Route, Upstream, and mapped the former to the latter in the above steps.
-
-You can also try to create an Upstream, a Route and map them using the dashboard.
 
 .Try it yourself
 [%collapsible]
@@ -303,19 +320,7 @@ You can navigate to this address and see the Dashboard running.
 
 The default credentials are `admin`/`admin`.
 
-[.text-center]
-image::login-dashboard-screenshot.png[]
 
-After logging, go to btn:[Route] in the navigation bar on the left side.
-
-In the Route list, we can see the Route we created previously with `curl`.
-
-image::route-list-screenshot.png[]
-
-Next, navigate to btn:[Upstream].
-Likewise, the Dashboard displays our sample Upstream.
-
-image::upstream-list-screenshot.png[]
 
 First, we will enable `key-auth` plugin for the route. To do that:
 
@@ -376,7 +381,7 @@ To prove it, let's move back to the terminal and run below curl command.
 ====
 [source,bash]
 ----
-include::./commands/6_authentication_enable_failed_test.sh[]
+include::{commandsdir}/6_authentication_enable_failed_test.sh[]
 ----
 ====
 
@@ -404,7 +409,7 @@ We can retry the same request with the authentication key.
 ====
 [source,bash]
 ----
-include::./commands/7_authentication_enable_success_test.sh[]
+include::{commandsdir}/7_authentication_enable_success_test.sh[]
 ----
 ====
 
@@ -477,7 +482,7 @@ We update the existing `Consumer` plugin config with JWT-related configuration:
 ====
 [source,bash]
 ----
-include::./commands/8_update_consumer_jwt_credentials.sh[]
+include::{commandsdir}/8_update_consumer_jwt_credentials.sh[]
 ----
 ====
 
@@ -514,7 +519,7 @@ We can now add the `jwt-auth` plugin to the Route we have created previously:
 ====
 [source,bash]
 ----
-include::./commands/8_add_jwt_plugin_to_route.sh[]
+include::{commandsdir}/8_add_jwt_plugin_to_route.sh[]
 ----
 ====
 
@@ -564,7 +569,7 @@ First, you need to set up the route for the API that signs the token, which will
 ====
 [source,bash]
 ----
-include::./commands/8_jwt_plugin_enable_public-api-plugin.sh[]
+include::{commandsdir}/8_jwt_plugin_enable_public-api-plugin.sh[]
 ----
 ====
 
@@ -598,7 +603,7 @@ Then, run the following command to generate a new JWT token:
 ====
 [source,bash]
 ----
-include::./commands/8_jwt_plugin_generate_token.sh[]
+include::{commandsdir}/8_jwt_plugin_generate_token.sh[]
 ----
 ====
 
@@ -623,7 +628,7 @@ We can use the newly-generated token to authenticate our next request:
 ====
 [source,bash]
 ----
-include::./commands/8_jwt_plugin_in_use.sh[]
+include::{commandsdir}/8_jwt_plugin_in_use.sh[]
 ----
 ====
 
@@ -648,7 +653,7 @@ If you try to access the same endpoint without a token in the Header request, yo
 ====
 [source,bash]
 ----
-include::./commands/8_jwt_plugin_failure_example.sh[]
+include::{commandsdir}/8_jwt_plugin_failure_example.sh[]
 ----
 ====
 
@@ -1014,7 +1019,7 @@ To http-logger settings, we can just put our mock server uri address like below:
 ====
 [source,bash]
 ----
-include::./commands/9_http_logger_plugin_enable.sh[]
+include::{commandsdir}/9_http_logger_plugin_enable.sh[]
 ----
 ====
 
@@ -1619,7 +1624,7 @@ We can setup new route with our new plugin enabled.
 ====
 [source,bash]
 ----
-include::./commands/14_custom_file_logger_plugin_enable.sh[]
+include::{commandsdir}/14_custom_file_logger_plugin_enable.sh[]
 ----
 ====
 
@@ -1700,3 +1705,14 @@ include::../custom-plugin/file-logger-full-solution.lua[]
 With Apache APISIX, you can also write tests to validate the behaviour of plugins.
 Please navigate to https://apisix.apache.org/docs/apisix/internal/testing-framework/[APISIX Testing Framework] for more details.
 ====
+
+=== Just enough abstractions
+
+We should first familiarize ourselves with a couple of core concepts offeres by APISIX.
+
+* https://apisix.apache.org/docs/apisix/architecture-design/upstream/[Upstream^] represents a backend service from the Apache APISIX point of view.
+* https://apisix.apache.org/docs/apisix/architecture-design/route/[Route^] is the most important concept; it instructs APISIX to forward traffic to the correct upstream based on the request.
+* APISIX is build on top of a plugin architecture.
+Every feature (authentication, authorization, etc.) is a https://apisix.apache.org/docs/apisix/architecture-design/plugin/[Plugin^].
+For reference purposes, plugins are grouped into categories: general, transformation, authentication, security, traffic control, observability, serverless, and other protocols.
+
