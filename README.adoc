@@ -441,7 +441,7 @@ We can now retry the same request with the authentication key.
 
 [source,bash]
 ----
-curl -H 'apikey: john' localhost:9080/anything           <1>
+curl -i -H 'apikey: john' localhost:9080/anything           <1>
 ----
 
 <1> The default header name is `apikey`.
@@ -481,7 +481,94 @@ Server: APISIX/3.9.0
 
 In this section, we learned about the `Consumer` and `Plugin` objects, and how to implement a simple authentication mechanism with the `key-auth` plugin.
 
-== Plugins Usage
+== More plugins goodness
+
+As mentioned above, lots of APISIX features are implemented via plugins.
+In this section, we are going to browse and use a couple of them across different use cases.
+
+=== Limit Count Plugin
+
+Traffic management is a must-have of any _reverse proxy_ worth their salt.
+An API Gateway is no exception.
+Rate limiting is a strategy for limiting network traffic.
+It puts a cap on how often someone can repeat an action within a specific timeframe – for instance, trying to log into an account.
+
+Apache APISIX offers no less than three plugins to rate limit requests:
+
+* https://apisix.apache.org/docs/apisix/plugins/limit-conn/[limit conn^]: limits the number of concurrent requests
+* https://https://apisix.apache.org/docs/apisix/plugins/limit-req/[limit req^]: limits the number of requests based on the https://en.wikipedia.org/wiki/Leaky_bucket[Leaky Bucket^] algorithm
+* https://https://apisix.apache.org/docs/apisix/plugins/limit-count/[limit count^]: limits the number of requests based on a fixed time window
+
+The `limit-count` plugin is the simplest one and a good candidate for this workshop.
+
+Let's enable the `limit-count` plugin on our existing Route.
+The requirements are as follow:
+
+* The limit is at most 1 request per minute
+* If the limit is exceeded, the HTTP status code should be `429` and the message should be `You have exceeded your quota, try again later`
+
+With the help of the https://apisix.apache.org/docs/apisix/admin-api/#route-api[Admin API^] and the https://apisix.apache.org/docs/apisix/plugins/limit-count/[plugin^] documentation, set the `limit-count` plugin on the `Route` with ID `1` with the above parameters.
+
+.See the command
+[%collapsible]
+====
+[source,bash]
+----
+include::{commandsdir}/8_set_limit_count.sh[]
+----
+
+<1> Path to the new plugin, _i.e._, `/routes/1/plugins/limit-count`
+<2> The unit is in seconds
+<3> Other parameters fulfill the above requirements
+====
+
+We can try to send a request as above.
+
+[source,bash]
+----
+curl -H 'apikey: john' localhost:9080/anything
+curl -H 'apikey: john' localhost:9080/anything
+----
+
+The first request should work, but the second one should return a `429` status code.
+
+[INFO]
+====
+You also can complete the above operation through the web interface by adding the `limit-count` plugin:
+
+image::dashboard-limit-count-plugin.png[]
+====
+
+=== Consumer groups
+
+=== Disabling and removing a plugin
+
+Before diving in further, we need to learn how to disable and remove a plugin.
+
+* Disabling a plugin means that it's still there along, but APISIX won't execute it the plugin chain
+* Removing a plugin means that it's gone, along with its configuration.
+If you want to add it again, you'll need to configure it from scratch.
+You can remove a `Plugin` on a `Route` in two ways:
+** Use `PUT` to completely replace the existing `Route`
+** Use `PATCH` to only remove the selected plugin by setting it to `null`
+
+For learning purposes, having to set the `apiky` header to authenticate each request is cumbersome.
+Let's remove the `key-auth` plugin we added in the previous section.
+Read the https://docs.api7.ai/apisix/reference/plugin-common-configurations#_metadisable[appropriate documentation^] and disable the `auth-plugin` on the `Route` with ID `1`.
+
+.See the command
+[%collapsible]
+====
+[source,bash]
+----
+include::{commandsdir}/8_disable_plugin.sh[]
+----
+
+<1> Path to the `key-auth` plugin, _i.e._, `/routes/1/plugins/key-auth`
+<2> The body set the `disable` meta parameter to `true`
+====
+
+Send a request to the endpoint without an `apiky` header; it should work because the `auth-key` plugin is now disabled.
 
 === JWT Plugin
 
@@ -894,137 +981,6 @@ There are other security plugins are offered by Apache APISIX too.
 - **https://apisix.apache.org/docs/apisix/plugins/ip-restriction/[IP Restriction^]** (_consumer-restriction_) – technique is to limit the IPs of clients that can send requests
 by whitelisting/blacklisting IP addresses list.
 - **https://apisix.apache.org/docs/apisix/plugins/csrf[CSRF^]** – Based on the Double Submit Cookie way, protects your API from CSRF attacks.
-====
-
-=== Limit Count Plugin
-
-API traffic management can improve the overall visibility of one's system and better understand the state of the traffic throughout one's organization.
-A better understanding of the undergoing activities provides many opportunities to solve problems.
-
-With the help of an API Gateway, one can set automatic retries, timeouts, circuit breakers, or rate-limiting.
-Rate limiting is a strategy for limiting network traffic. It puts a cap on how often someone can repeat an action within a specific timeframe – for instance, trying to log into an account.
-
-[INFO]
-====
-The https://apisix.apache.org/docs/apisix/plugins/limit-count/[Limit count plugin^] is one among many limiting plugins.
-It limits the request rate by a fixed number of requests in a given time window:
-how many HTTP requests one can make in a given period of seconds, minutes, hours, days, months, or years.
-====
-
-Let's enable the `limit-count` plugin on our existing Route.
-To do so, run the following command:
-
-[source,bash]
-----
-curl -i http://127.0.0.1:9080/apisix/admin/routes/1 -H 'X-API-KEY: edd1c9f034335f136f87ad84b625c8f1' -X PUT -d '
-{
-    "uri": "/get",
-    "plugins": {
-        "limit-count": {
-            "count": 2,
-            "time_window": 60,
-            "rejected_code": 503,
-            "key_type": "var",
-            "key": "remote_addr"
-        }
-    },
-    "upstream_id": "1"
-}'
-----
-
-Output:
-
-[source,text]
-----
-HTTP/1.1 200 OK
-Date: Sun, 08 May 2022 10:50:40 GMT
-Content-Type: application/json
-Transfer-Encoding: chunked
-Connection: keep-alive
-Server: APISIX/2.13.1
-Access-Control-Allow-Origin: *
-Access-Control-Allow-Credentials: true
-Access-Control-Expose-Headers: *
-Access-Control-Max-Age: 3600
-
-{"action":"set","node":{"value":{"update_time":1652007040,"id":"1","status":1,"create_time":1648567195,"priority":0,"uri":"\/get","plugins":{"limit-count":{"allow_degradation":false,"time_window":60,"show_limit_quota_header":true,"rejected_code":503,"policy":"local","count":2,"key":"remote_addr","key_type":"var"}},"upstream_id":"1"},"key":"\/apisix\/routes\/1"}}
-----
-
-The above configuration limits the number of requests to *two in 60 seconds*.
-Apache APISIX will handle the first two requests as usual:
-
-[source,bash]
-----
-curl -i http://127.0.0.1:9080/get
-----
-
-A third request in the same period will return a 503 HTTP code:
-
-[source,text]
-----
-HTTP/1.1 503 Service Temporarily Unavailable
-Date: Sun, 08 May 2022 10:51:02 GMT
-Content-Type: text/html; charset=utf-8
-Content-Length: 194
-Connection: keep-alive
-Server: APISIX/2.13.1
-
-<html>
-<head><title>503 Service Temporarily Unavailable</title></head>
-<body>
-<center><h1>503 Service Temporarily Unavailable</h1></center>
-<hr><center>openresty</center>
-</body>
-</html>
-----
-
-You can configure the failure HTTP Status `403 Forbidden` by configuring `rejected_code` and message with the `rejected_msg` attributes.
-For example, we can set it with `Requests are too frequent, please try again later`.
-After reaching the threshold, the response is similar to the following:
-
-.See the example with custom rejection message:
-[%collapsible]
-====
-[source,bash]
-----
-curl -i http://127.0.0.1:9080/apisix/admin/routes/1 -H 'X-API-KEY: edd1c9f034335f136f87ad84b625c8f1' -X PUT -d '
-{
-    "uri": "/get",
-    "plugins": {
-        "limit-count": {
-            "count": 2,
-            "time_window": 60,
-            "rejected_code": 403,
-            "rejected_msg": "Requests are too frequent, please try again later.",
-            "key_type": "var",
-            "key": "remote_addr"
-        }
-    },
-    "upstream_id": "1"
-}'
-----
-====
-
-Result:
-
-[source,text]
-----
-HTTP/1.1 403 Forbidden
-Date: Sun, 08 May 2022 11:30:43 GMT
-Content-Type: text/plain; charset=utf-8
-Transfer-Encoding: chunked
-Connection: keep-alive
-Server: APISIX/2.13.1
-
-{"error_msg":"Requests are too frequent, please try again later."}
-----
-
-[INFO]
-====
-As usual, You also can complete the above operation through the web interface, first add a route, then add the `limit-count` plugin:
-
-image::limit-count-plugin-enable-with-dashboard-screenshot.png[]
-
 ====
 
 === HTTP Logger Plugin
