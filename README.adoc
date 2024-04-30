@@ -7,6 +7,8 @@ Nicolas Fränkel
 :imagesdir: ./pages
 :commandsdir: ./commands
 
+This workshop is hosted at <https://nfrankel.github.io/apisix-workshop>.
+
 [NOTE]
 ====
 The workshop was initially designed by Bobur Umurzukov with my help.
@@ -23,7 +25,7 @@ In this session, we will to show a couple of APISIX's nifty features that can he
 * Configuring APISIX with the dashboard
 * Configuring APISIX with the command-line
 * Monitoring APISIX
-* Introduction to plugin development in Lua (basics of Lua included)
+* Introduction to plugin development in Lua
 
 The workshop is designed to be self-driven, but if at any point, you need help, just ask the instructor for help.
 
@@ -32,7 +34,7 @@ The workshop is designed to be self-driven, but if at any point, you need help, 
 This section explains the context of the workshop.
 If you prefer, you can directly skip to the link:#prerequisites[hands-on part].
 
-https://apisix.apache.org/[Apache APISIX^] is an API Gateway steered by the Apache Foundation.
+https://apisix.apache.org/[Apache APISIX^] is an _API Gateway_ steered by the https://apache.org/[Apache Foundation^].
 
 When you expose your services to the outside world, a lot of bad things can happen.
 For instance, a malicious actor could try to access your services without permission.
@@ -253,8 +255,8 @@ The reverse is not true:
 the dashboard doesn't cover every possible API call.
 ====
 
-In this section, we are going to set up authentication for our requests to `httpbin`.
-Rememember that though the backend service could implement it, it's more efficient to factor this feature in the API Gateway than to implement it in every service.
+Remember that though the backend service could implement it, it's more efficient to factor this feature in the API Gateway than to implement it in every service.
+For this reason, we are going to add authentication to the Route.
 
 === Display the existing objects
 
@@ -264,195 +266,220 @@ It's accessible at <http://localhost:9000/>.
 The credentials are `admin`/`admin` by default.
 
 [.text-center]
-image::dashboard-login.png[]
+image::dashboard-login.png[Dashboard login,437,579]
 
 After logging, go to btn:[Route] in the navigation bar on the left side.
 In the `Route` list, we can see the `Route` we created previously.
 
-image::dashboard-list-routes.png[]
+image::dashboard-routes-list.png[]
 
 Next, navigate to btn:[Upstream].
 Likewise, the dashboard displays our `Upstream`.
 
-image::dashboard-list-upstream.png[]
+image::dashboard-upstreams-list.png[]
 
-=== Add a new `Consumer`
+=== Update existing objects
 
-Authentication is tied to an identity.
-In Apache APISIX, we call an identity a `Consumer`.
-On the dashboard, display the existing `Consumer` objects by clicking on the btn:[Consumer] menu item on the left side:
-there should be none.
+The Dashboard allows not only viewing existing objects but also creating, updating and deleting object.
+At the moment, neither the `Route` nor the `Upstream` have a user-friendly name.
+We will use two different methods to add one:
+via the _Configure_ wizard and directly via the JSON object.
 
-Click on btn:[Create].
+==== Updating via the Configure wizard
 
-image::dashboard-create-new-consumer.png[]
+. Go to the `Upstream` screen
+. Click the btn:[Configure] button for the single `Upstream` displayed
+. In the opening screen, set a name, _e.g._, "Local httpbin"
++
+image::dashboard-upstream-details.png[]
+. Click btn:[Next], then btn:[Submit].
+The list now displays the `Upstream` with its updated name.
++
+image:dashboard-upstreams-list-updated.png[]
 
-In the next screen, give the new `Consumer` a name, _e.g._, `johndoe`.
+==== Updating via JSON
 
-image::dashboard-consumer-detail.png[]
+As an alternative to the wizard, we can directly update an object's JSON configuration.
 
-Click btn:[Next] until the end of the wizard.
-The new `Consumer` should now appear in the list.
+. Navigate to the `Route` screen
+. On the right side of the `Route` object, locate the menu:More[View] button
++
+image:dashboard-routes-list-view.png[]
+. On the opening screen, change the name to something more descriptive, _e.g_, "Anything"
++
+image:dashboard-route-details-raw.png[]
+. In the list, we can now see the updated `Route` name
++
+image:dashboard-routes-list-updated.png[]
 
-.Try it yourself
-[%collapsible]
-====
+This is but a taste of the Apache APISIX Dasboard.
+We continue the workshop with the CLI.
 
-*Create an Upstream*
+== Learning about `Consumer` and `Plugin` via an authentication use case
 
-1. Access your dashboard instance running on the address http://localhost:9000/ and
-login with default credentials `admin`/`admin`.
-2. Go to *Upstream* > *Upstream List*.
-3. Click btn:[Create] to add new Upstream.
-4. For this example, enter example_upstream in the *Name* field.
-5. Scroll down and in the *Target* field, specify httpbin.org with port 80.
-6. Keep other fields as default.
-7. Scroll down and click btn:[Next].
-8. Review and click btn:[Submit].
-9. On the *Upstreams* page, you can see the new upstream service and click btn:[View] to see Raw data of configuration.
+The `Route` we have created above is public.
+Thus, anyone can access the underlying `Upstream` as long as they know the endpoint Apache APISIX exposes to the outside world.
+It's not safe, as a malicious actor could use this endpoint.
+In this section, we are going to set up authentication for our requests to `httpbin`.
 
-*Create a Route and bind it to the upstream from previous steps.*
+=== Create a `Consumer`
 
-1. Go to *Route* > *Route List*.
-2. Click btn:[Create] to add new Route.
-3. Enter example_route in the *Name* field.
-4. Scroll down and in the *Path* field, specify URI "/get".
-5. In the *HTTP Method* field, keep only GET and remove others.
-6. Keep other fields as default.
-7. Scroll down and click btn:[Next].
-8. In the next page, *Define API Backend Server* section, you can select only example_upstream in the Select Upstream field from dropdown menu.
-9. Scroll down and click btn:[Next].
-10. No need to enable plugin at this stage, click simply btn:[Next]
-11. Review and click btn:[Submit].
-12. On the *Routes* page, you can see the new route and click btn:[View] to see Raw data of configuration.
-
-====
-
-The Route we have created is public.
-Thus, anyone can access the underlying Upstream as long as they know the endpoint Apache APISIX exposes to the outside world.
-It's not safe as a malicious actor could use this endpoint.
-For this reason, we are going to add authentication to the Route.
-
-Apache APISIX dashboard is running on the address http://localhost:9000/.
-You can navigate to this address and see the Dashboard running.
-
-The default credentials are `admin`/`admin`.
-
-
-
-First, we will enable `key-auth` plugin for the route. To do that:
-
-Navigate to btn:[Route], click btn:[Configure] and skip
-*Define API Backend Server* section and open *Plugin Config*
-
-image::key-auth-plugin-enable-route.png[]
-
-In this section, you can find `key-auth` plugin and click btn:[Enable].
-Request raw data you can keep as empty and push the toggle switch on.
-
-image::key-auth-plugin-switch-on.png[]
-
-Then press btn:[Submit] to save changes, click btn:[Next] and after btn:[Submit]
-to update route configs.
-
-=== Enable key-auth plugin
-
-For this Consumer, we will apply a key authentication.
-Among the many plugins available, let's choose `key auth`.
-
-image::key-auth-plugin-enable-screenshot.png[]
-
-Click btn:[Enable] and push the toggle switch on.
-Then, provide a key for the Consumer, _e.g._, `john`.
-btn:[Submit], click btn:[Next] and btn:[Submit] again.
-
-Raw JSON data for Plugin editor config:
-
-[source,json5]
-----
-{
-  "key": "key-of-john"
-}
-----
-
-image::plugin-config-example-screenshot.png[]
-
-At this point, we should have a ready-to-use Consumer.
-
-image::example-consumer-created-screenshot.png[]
-
-We control the data allowed to transit via the gateway by adding authentication.
-We can identify *unique* Consumers accessing our API.
-Any request that does not include a valid API key will be rejected with an HTTP `401` status.
-
-To prove it, let's move back to the terminal and run below curl command.
+Authentication is tied to an _identity_; Apache APISIX represents an identity as a `Consumer` object.
+With the help of the https://apisix.apache.org/docs/apisix/admin-api/#consumer[Admin API^], list all existing `Consumer` objects; there should be none.
 
 .See the command
 [%collapsible]
 ====
 [source,bash]
 ----
-include::{commandsdir}/6_authentication_enable_failed_test.sh[]
+include::{commandsdir}/4_list_consumers.sh[]
 ----
 ====
 
-Because we didn't set the authentication key, Apache APISIX will return an unauthorized error.
+Now, let's create a `Consumer` object with the name `johndoe`.
 
-Response:
+.See the command
+[%collapsible]
+====
+[source,bash]
+----
+include::{commandsdir}/5_create_consumer.sh[]
+----
+====
 
-[source,json5]
+Now, list the `Consumer` objects again.
+The result should be something like this (formatted for ease of reading):
+
+[source,json]
+----
+{
+  "list": [
+    {
+      "key": "/apisix/consumers/johndoe",
+      "value": {
+        "update_time": 1714465186,
+        "create_time": 1714461458,
+        "username": "johndoe"
+      },
+      "modifiedIndex": 58,
+      "createdIndex": 38
+    }
+  ],
+  "total": 1
+}
+----
+
+=== Add a `Plugin` to a `Route` object
+
+So far, we have used several APISIX abstractions: `Route`, `Upstream`, and `Consumer`.
+We need one more to go further.
+Apache APISIX builds upon a plugin-based architecture:
+every functionality such as rate limiting, authentication, etc. is implemented via a `Plugin` object.
+APISIX comes with a large set of https://apisix.apache.org/plugins/[built-in plugins^] for common capabilities, but you can create your own in case you can't find one that fits your requirements.
+
+https://apisix.apache.org/plugins/#Authentication[A couple of existing plugins^] implement authentication.
+To keep things simple, we are going to use the simplest one, the https://apisix.apache.org/docs/apisix/plugins/key-auth/[key-auth^] plugin.
+With this plugin, we can authenticate requests based on either an HTTP header or a query parameter.
+First, we need to add the `Plugin` to the `Route`.
+Use the Admin API to enable the `key-auth` plugin for the `Route` we created earlier.
+
+.See the command
+[%collapsible]
+====
+[source,bash]
+----
+include::{commandsdir}/6_add_authentication_to_route.sh[]
+----
+
+<1> Use the `/routes` endpoints
+<2> Work on the `Route` with ID `1`
+<3> Patch the exising `Route`
+<4> Set the `key-auth` plugin with no additional configuration
+====
+
+At this point, we control who can access the `/anything` endpoint by authenticating requests.
+Requests that don't include a valid API key are rejected with an HTTP `401` status.
+Let's check:
+
+[source,bash]
+----
+curl -i localhost:9080/anything
+----
+
+Because we didn't set the authentication key, Apache APISIX will return a `401 Unauthorized` error.
+
+[source,http]
 ----
 HTTP/1.1 401 Unauthorized
-Date: Sun, 27 Mar 2022 15:18:15 GMT
+Date: Tue, 30 Apr 2024 08:38:38 GMT
 Content-Type: text/plain; charset=utf-8
 Transfer-Encoding: chunked
 Connection: keep-alive
-Server: APISIX/2.12.1
+Server: APISIX/3.9.0
 
 {"message":"Missing API key found in request"}
 ----
 
-
-We can retry the same request with the authentication key.
+To authenticate, we need to set the key on the `Consumer` object.
+With the help of the https://apisix.apache.org/docs/apisix/admin-api/#consumer-api[Admin API^], update `johndoe` with an API key, _e.g._, `john`.
 
 .See the command
 [%collapsible]
 ====
 [source,bash]
 ----
-include::{commandsdir}/7_authentication_enable_success_test.sh[]
+include::{commandsdir}/7_set_consumer_key.sh[]
 ----
+
+<1> Use the `/consumers` endpoints
+<2> The Consumers API doesn't support patching existing objects.
+We need to use `PUT` *and* specify which `Consumer` object to work on
+<3> Set the `key-auth` plugin with no additional configuration
 ====
+
+We can now retry the same request with the authentication key.
+
+[source,bash]
+----
+curl -H 'apikey: john' localhost:9080/anything           <1>
+----
+
+<1> The default header name is `apikey`.
+You can override it in the `Plugin` configuration.
 
 We can now successfully access the endpoint!
 
-[source,json5]
+[source,http]
 ----
 HTTP/1.1 200 OK
 Content-Type: application/json
-Content-Length: 330
+Content-Length: 334
 Connection: keep-alive
-Date: Sun, 27 Mar 2022 15:22:27 GMT
+Date: Tue, 30 Apr 2024 08:50:12 GMT
 Access-Control-Allow-Origin: *
 Access-Control-Allow-Credentials: true
-Server: APISIX/2.12.1
+Server: APISIX/3.9.0
 
 {
-"args": {},
-"headers": {
-"Accept": "*/*",
-"Apikey": "key-of-john",
-"Host": "127.0.0.1",
-"User-Agent": "curl/7.68.0",
-"X-Amzn-Trace-Id": "Root=1-62408133-62400aae5dea7be428a89f8b",
-"X-Forwarded-Host": "127.0.0.1"
-},
-"origin": "172.19.0.1, 85.253.48.169",
-"url": "http://127.0.0.1/get"
+  "args": {},
+  "data": "",
+  "files": {},
+  "form": {},
+  "headers": {
+    "Accept": "*/*",
+    "Apikey": "john",
+    "Host": "localhost:9080",
+    "User-Agent": "curl/8.4.0",
+    "X-Forwarded-Host": "localhost"
+  },
+  "json": null,
+  "method": "GET",
+  "origin": "192.168.65.1",
+  "url": "http://localhost/anything"
 }
 ----
 
-Above section showed how to use Apache APISIX to deploy, configure, and securely publish APIs from the Dashboard.
+In this section, we learned about the `Consumer` and `Plugin` objects, and how to implement a simple authentication mechanism with the `key-auth` plugin.
 
 == Plugins Usage
 
