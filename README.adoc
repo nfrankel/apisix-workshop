@@ -104,7 +104,7 @@ Once everything is started, we can run a simple `curl` command to check if APISI
 
 [source,bash]
 ----
-curl http://localhost:9180/apisix/admin/routes -H 'X-API-KEY: edd1c9f034335f136f87ad84b625c8f1'
+curl http://localhost:9180/apisix/admin/routes
 ----
 
 Don't worry about the command for now.
@@ -114,6 +114,28 @@ It should return something similar to:
 ----
 {"list":[],"total":0}
 ----
+
+[IMPORTANT]
+====
+The command to list all routes is normally secured by an API key.
+In the context of this workshop, this security feature has been disabled to avoid extra typing.
+*You should never ever use this setting in a production environement!*
+Moreover, you should change the default API key before your first deployment.
+
+[source,yaml]
+----
+deployment:
+  admin:
+    admin_key_required: true            <1>
+    admin_key:
+      - name: admin
+        key: 5om3v3ryl0ng53cr3t         <2>
+        role: admin
+----
+
+<1> Change back to default `true` value
+<2> Change the keyword to something more secure and keep it secret
+====
 
 == First steps
 
@@ -708,7 +730,7 @@ Here's a simple example:
 
 [source,bash]
 ----
-curl http://localhost:9180/apisix/admin/routes/1/plugins/consumer-restriction -H 'X-API-KEY: edd1c9f034335f136f87ad84b625c8f1' -X PUT -d '
+curl http://localhost:9180/apisix/admin/routes/1/plugins/consumer-restriction -X PUT -d '
 {
   "type": "consumer_group_id",
   "allowed_by_methods": [
@@ -1208,7 +1230,7 @@ Here's an example to enable the `zipkin plugin` on the specified route:
 
 [source,bash]
 ----
-curl http://127.0.0.1:9080/apisix/admin/routes/1  -H 'X-API-KEY: edd1c9f034335f136f87ad84b625c8f1' -X PUT -d '
+curl http://127.0.0.1:9080/apisix/admin/routes/1  -X PUT -d '
 {
     "methods": ["GET"],
     "uri": "/get",
@@ -1358,7 +1380,7 @@ Let's run the following cmd to enable `azure-functions` plugin for the route:
 
 [source,bash]
 ----
-curl http://127.0.0.1:9080/apisix/admin/routes/1 -H 'X-API-KEY: edd1c9f034335f136f87ad84b625c8f1' -X PUT -d '
+curl http://127.0.0.1:9080/apisix/admin/routes/1 -X PUT -d '
 {
     "plugins": {
         "azure-functions": {
@@ -1677,7 +1699,7 @@ We can directly run `apisix reload` command to reload the latest plugin code wit
 ====
 [source,curl]
 ----
-curl http://127.0.0.1:9080/apisix/admin/plugins/reload -H 'X-API-KEY: edd1c9f034335f136f87ad84b625c8f1' -X PUT
+curl http://127.0.0.1:9080/apisix/admin/plugins/reload -X PUT
 ----
 ====
 

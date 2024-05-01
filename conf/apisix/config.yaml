@@ -1,5 +1,6 @@
 deployment:
   admin:
+    admin_key_required: false   # Enable Admin API authentication by default for security.
     allow_admin:
       - 0.0.0.0/0
   etcd:
