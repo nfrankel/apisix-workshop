@@ -7,6 +7,7 @@ Nicolas Fränkel
 :sectnums:
 :imagesdir: ./pages
 :commandsdir: ./commands
+:stylesheet: ./pages/styles.css
 
 Welcome to this workshop on https://apisix.apache.org/[Apache APISIX^]!
 We will show here a couple of APISIX's nifty features that can help your information system cope with the challenges introduced by APIs:
@@ -22,7 +23,7 @@ We will show here a couple of APISIX's nifty features that can help your informa
 The workshop is designed to be self-driven, but if at any point, you need help, just ask the instructor.
 
 ++++
-<a href="https://github.com/nfrankel/apisix-workshop/fork" target="_blank"><img decoding="async" width="149" height="149" src="https://github.blog/wp-content/uploads/2008/12/forkme_right_green_007200.png?resize=149%2C149" class="attachment-full size-full" alt="Fork me on GitHub" loading="lazy" data-recalc-dims="1" style="position:fixed;top:0px;right:0px"></a>
+<a href="https://github.com/nfrankel/apisix-workshop/fork" target="_blank"><img id="fork" decoding="async" src="https://github.blog/wp-content/uploads/2008/12/forkme_right_green_007200.png?resize=149%2C149" class="attachment-full size-full" alt="Fork me on GitHub" loading="lazy" data-recalc-dims="1"></a>
 ++++
 
 toc::[]
@@ -250,7 +251,6 @@ You can find more information about the APISIX Dashboard in the https://apisix.a
 
 If you have time, the Getting started with Apache APISIX Dashboard video tutorial is a good introduction to the dashboard:
 
-[.text-center]
 video::-9-HZKK2ccI[youtube,width=840,height=470]
 
 [IMPORTANT]
@@ -273,18 +273,20 @@ We can see the result of our work on the dashboard.
 It's accessible at <http://localhost:9000/>.
 The credentials are `admin`/`admin` by default.
 
-[.text-center]
-image::dashboard-login.png[Dashboard login,437,579]
+.APISIX Dashboard login
+image::dashboard-login.png[APISIX Dashboard login,437,579]
 
 After logging, go to btn:[Route] in the navigation bar on the left side.
 In the `Route` list, we can see the `Route` we created previously.
 
-image::dashboard-routes-list.png[]
+.Routes List on the APISIX Dashboard
+image::dashboard-routes-list.png[Routes List on the APISIX Dashboard]
 
 Next, navigate to btn:[Upstream].
 Likewise, the dashboard displays our `Upstream`.
 
-image::dashboard-upstreams-list.png[]
+.Upstreams List on the APISIX Dashboard
+image::dashboard-upstreams-list.png[Upstreams List on the APISIX Dashboard]
 
 === Update existing objects
 
@@ -299,11 +301,13 @@ via the _Configure_ wizard and directly via the JSON object.
 . Click the btn:[Configure] button for the single `Upstream` displayed
 . In the opening screen, set a name, _e.g._, "Local httpbin"
 +
-image::dashboard-upstream-details.png[]
+.Upstream details on the APISIX Dashboard
+image::dashboard-upstream-details.png[Upstream details on the APISIX Dashboard]
 . Click btn:[Next], then btn:[Submit].
 The list now displays the `Upstream` with its updated name.
 +
-image:dashboard-upstreams-list-updated.png[]
+.Updated Upstream list on the APISIX Dashboard
+image::dashboard-upstreams-list-updated.png[Updated Upstream list on the APISIX Dashboard]
 
 ==== Updating via JSON
 
@@ -312,13 +316,16 @@ As an alternative to the wizard, we can directly update an object's JSON configu
 . Navigate to the `Route` screen
 . On the right side of the `Route` object, locate the menu:More[View] button
 +
-image:dashboard-routes-list-view.png[]
+.Routes List on the APISIX Dashboard
+image::dashboard-routes-list-view.png[Routes List on the APISIX Dashboard]
 . On the opening screen, change the name to something more descriptive, _e.g_, "Anything"
 +
-image:dashboard-route-details-raw.png[]
+.Route Raw Configuration Editor on the APISIX Dashboard
+image::dashboard-route-details-raw.png[Route Raw Configuration Editor,700,332]
 . In the list, we can now see the updated `Route` name
 +
-image:dashboard-routes-list-updated.png[]
+.Updated Routes list on the APISIX Dashboard
+image::dashboard-routes-list-updated.png[Updated Routes list on the APISIX Dashboard]
 
 This is but a taste of the Apache APISIX Dasboard.
 We continue the workshop with the CLI.
@@ -777,6 +784,9 @@ metrics, logs, and traces.
 Metrics are a numeric representation of data measured over intervals of time.
 You can aggregate data into buckets of various frequency in your datastore, like Elasticsearch or Grafana, and run queries against it.
 You can also configure alerts that trigger when a condition is met, _.e.g._, 10% of `500` HTTP status code in a 10 seconds interval.
+
+[.right]
+image:prometheus-logo.svg[Prometheus logo, 200, 200]
 
 In the metrics space, https://prometheus.io/[Prometheus^] is very widespread.
 Apache APISIX offers a `prometheus` plugin that exposes metrics in the Prometheus format.
