@@ -1,5 +1,6 @@
 = Apache APISIX Hands-on Lab
 Nicolas Fränkel
+:source-highlighter: highlight.js
 :toc: macro
 :icons: font
 :experimental: true
