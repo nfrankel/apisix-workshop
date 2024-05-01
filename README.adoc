@@ -1,4 +1,4 @@
-= Hands-on lab Apache APISIX
+= Apache APISIX Hands-on Lab
 Nicolas Fränkel
 :toc: macro
 :icons: font
@@ -6,6 +6,19 @@ Nicolas Fränkel
 :sectnums:
 :imagesdir: ./pages
 :commandsdir: ./commands
+
+Welcome to this workshop on https://apisix.apache.org/[Apache APISIX^]!
+We will show here a couple of APISIX's nifty features that can help your information system cope with the challenges introduced by APIs:
+
+* Routing your calls to an `Upstream`
+* Available abstractions: `Route`, `Upstream`, `Consumer`, and `Plugin`
+* The Apache APISIX dashboard
+* Configuring APISIX with the dashboard
+* Configuring APISIX with the command-line
+* Monitoring APISIX
+* Introduction to plugin development in Lua
+
+The workshop is designed to be self-driven, but if at any point, you need help, just ask the instructor.
 
 ++++
 <a href="https://github.com/nfrankel/apisix-workshop/fork" target="_blank"><img decoding="async" width="149" height="149" src="https://github.blog/wp-content/uploads/2008/12/forkme_right_green_007200.png?resize=149%2C149" class="attachment-full size-full" alt="Fork me on GitHub" loading="lazy" data-recalc-dims="1" style="position:fixed;top:0px;right:0px"></a>
@@ -19,21 +32,11 @@ The workshop was initially designed by Bobur Umurzukov with my help.
 Thanks for all his hard work!
 ====
 
-Welcome to this workshop on https://apisix.apache.org/[Apache APISIX^]!
-
-In this session, we will to show a couple of APISIX's nifty features that can help your information system cope with the challenges introduced by APIs:
-
-* Routing your calls to an `Upstream`
-* Available abstractions: `Route`, `Upstream`, `Consumer`, and `Plugin`
-* The Apache APISIX dashboard
-* Configuring APISIX with the dashboard
-* Configuring APISIX with the command-line
-* Monitoring APISIX
-* Introduction to plugin development in Lua
-
-The workshop is designed to be self-driven, but if at any point, you need help, just ask the instructor for help.
-
+[discrete]
 == Overview
+
+[.right]
+image:apisix-logo.png[Apache APISIX logo, 200, 200]
 
 This section explains the context of the workshop.
 If you prefer, you can directly skip to the link:#prerequisites[hands-on part].
@@ -62,14 +65,14 @@ That's where API Gateways enter the field.
 An API Gateway is a reverse proxy "on steroids".
 It should do everything a reverse proxy does, and more, especially in the context of APIs.
 
-== Laying out the workshop
+== Preparing for the workshop
 
-* This workshops is based on Docker Compose.
+* This workshops is largely based on https://docs.docker.com/compose/[Docker Compose^] v3.
 You need a way to run https://www.docker.com/[Docker^] and Docker Compose files.
 Docker Dashboard works.
-If you want to use something else, please feel free to do so but if something doesn't work because of it, know that it decreases your chances that the instructor probably can help you with it.
+If you want to use something else, please feel free to do so but if something doesn't work because of it, know that it decreases your chances that the instructor can help you with it.
 * We use the https://curl.se/docs/manpage.html[curl^] command for API testing.
-You can also use other tools such as Postman for testing.
+You can also use other tools, such as https://www.postman.com/[Postman^] or similar.
 
 The workshop is hosted on a https://github.com/nfrankel/apisix-workshop/[GitHub repository^].
 At the root of the repository is a `docker-compose.yml` file that defines the infrastructure.
