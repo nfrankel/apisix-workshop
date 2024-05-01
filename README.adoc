@@ -1,13 +1,17 @@
 = Hands-on lab Apache APISIX
 Nicolas Fränkel
-:toc:
+:toc: macro
 :icons: font
 :experimental: true
 :sectnums:
 :imagesdir: ./pages
 :commandsdir: ./commands
 
-This workshop is hosted at <https://nfrankel.github.io/apisix-workshop>.
+++++
+<a href="https://github.com/nfrankel/apisix-workshop/fork" target="_blank"><img decoding="async" width="149" height="149" src="https://github.blog/wp-content/uploads/2008/12/forkme_right_green_007200.png?resize=149%2C149" class="attachment-full size-full" alt="Fork me on GitHub" loading="lazy" data-recalc-dims="1" style="position:fixed;top:0px;right:0px"></a>
+++++
+
+toc::[]
 
 [NOTE]
 ====
