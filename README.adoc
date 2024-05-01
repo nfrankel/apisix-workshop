@@ -732,10 +732,43 @@ Apache APISIX offers other security-oriented plugins:
 * https://apisix.apache.org/docs/apisix/plugins/cors[CORS^]: Allows developers to make cross-domain requests from the browser in a controlled way
 * https://apisix.apache.org/docs/apisix/plugins/csrf[CSRF^]: Based on the Double Submit Cookie way, protects your API from CSRF attacks.
 
+== Disabling and removing a plugin
+
+Before diving in further, we need to learn how to disable and remove a plugin.
+
+* Disabling a plugin means that it's still there along, but APISIX won't execute it the plugin chain
+* Removing a plugin means that it's gone, along with its configuration.
+If you want to add it again, you'll need to set its configuration from scratch.
+
+For learning purposes, having to set the `apiky` header to authenticate each request is cumbersome.
+Let's disable the `key-auth` plugin we added in the previous section.
+Read the https://docs.api7.ai/apisix/reference/plugin-common-configurations#_metadisable[appropriate documentation^], then disable the `key-auth` plugin and remove the `consumer-restriction` one on the `Route` with ID `1`.
+Try to achieve both in one single command.
+
+.See the command
+[%collapsible]
+====
+[source,bash]
+----
+include::{commandsdir}/14_disable_plugin.sh[]
+----
+
+<1> Path to the `Route`'s plugins
+<2> As we patch the entire `plugins` path and we don't set `consumer-restriction`, it's removed
+<3> Set the `disable` meta parameter to `true`
+====
+
+Send a request to the endpoint without an `apiky` header; it should work because the `auth-key` plugin is disabled and there is no `consumer-restriction`.
+
+[source,bash]
+----
+curl localhost:9080/anything
+----
+
 == Observing Apache APISIX
 
-Observability is the process of getting constant insights into the system's behavior.
-It's based on three pillars:
+Observability is the process of getting constant insights into a system's behavior.
+Observability is based on three pillars:
 metrics, logs, and traces.
 
 === Metrics
@@ -749,11 +782,12 @@ Apache APISIX offers a `prometheus` plugin that exposes metrics in the Prometheu
 The existing infrastructure is already ready for this:
 
 [source,yaml]
+./usr/local/apisix/conf/config.yaml
 ----
 include::conf/apisix/config.yaml[lines=27..31]
 ----
 
-Let's enable `prometheus` plugin for our route:
+However, we need to enable the plugin for our `Route`.
 
 [source,bash]
 ----
@@ -863,32 +897,6 @@ Behind the scene, Apache APISIX downloads https://github.com/apache/apisix/blob/
 
 
 == Other plugins
-
-=== Disabling and removing a plugin
-
-Before diving in further, we need to learn how to disable and remove a plugin.
-
-* Disabling a plugin means that it's still there along, but APISIX won't execute it the plugin chain
-* Removing a plugin means that it's gone, along with its configuration.
-If you want to add it again, you'll need to set its configuration from scratch.
-
-For learning purposes, having to set the `apiky` header to authenticate each request is cumbersome.
-Let's remove the `key-auth` plugin we added in the previous section.
-Read the https://docs.api7.ai/apisix/reference/plugin-common-configurations#_metadisable[appropriate documentation^] and disable the `auth-plugin` on the `Route` with ID `1`.
-
-.See the command
-[%collapsible]
-====
-[source,bash]
-----
-include::{commandsdir}/12_disable_plugin.sh[]
-----
-
-<1> Path to the `key-auth` plugin, _i.e._, `/routes/1/plugins/key-auth`
-<2> The body set the `disable` meta parameter to `true`
-====
-
-Send a request to the endpoint without an `apiky` header; it should work because the `auth-key` plugin is now disabled.
 
 === JWT Plugin
 
