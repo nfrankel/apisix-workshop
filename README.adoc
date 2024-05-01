@@ -732,6 +732,136 @@ Apache APISIX offers other security-oriented plugins:
 * https://apisix.apache.org/docs/apisix/plugins/cors[CORS^]: Allows developers to make cross-domain requests from the browser in a controlled way
 * https://apisix.apache.org/docs/apisix/plugins/csrf[CSRF^]: Based on the Double Submit Cookie way, protects your API from CSRF attacks.
 
+== Observing Apache APISIX
+
+Observability is the process of getting constant insights into the system's behavior.
+It's based on three pillars:
+metrics, logs, and traces.
+
+=== Metrics
+
+Metrics are a numeric representation of data measured over intervals of time.
+You can aggregate data into buckets of various frequency in your datastore, like Elasticsearch or Grafana, and run queries against it.
+You can also configure alerts that trigger when a condition is met, _.e.g._, 10% of `500` HTTP status code in a 10 seconds interval.
+
+In the metrics space, https://prometheus.io/[Prometheus^] is very widespread.
+Apache APISIX offers a `prometheus` plugin that exposes metrics in the Prometheus format.
+The existing infrastructure is already ready for this:
+
+[source,yaml]
+----
+include::conf/apisix/config.yaml[lines=27..31]
+----
+
+Let's enable `prometheus` plugin for our route:
+
+[source,bash]
+----
+curl http://127.0.0.1:9080/apisix/admin/routes/1  -H 'X-API-KEY: edd1c9f034335f136f87ad84b625c8f1' -X PUT -d '
+{
+    "uri": "/get",
+    "plugins": {
+        "prometheus":{}
+    },
+    "upstream_id": "1"
+}'
+----
+
+[NOTE]
+====
+When set _prefer_name_ to true in the request attribute, it will print route/service name instead of id in Prometheus metric.
+====
+
+Response:
+
+[source,json5]
+----
+{
+  "node": {
+    "value": {
+      "update_time": 1648206467,
+      "uri": "/get",
+      "create_time": 1646341656,
+      "status": 1,
+      "priority": 0,
+      "plugins": {
+        "prometheus": {
+          "prefer_name": false
+        }
+      },
+      "upstream_id": "1",
+      "id": "1"
+    },
+    "key": "/apisix/routes/1"
+  },
+  "action": "set"
+}
+----
+
+We fetch the metric data from the specified url `/apisix/prometheus/metrics`.
+
+[source,bash]
+----
+curl -i http://127.0.0.1:9091/apisix/prometheus/metrics
+----
+
+You will get response with Prometheus metrics something like below:
+
+[source,text]
+----
+HTTP/1.1 200 OK
+Server: openresty
+Date: Fri, 25 Mar 2022 11:13:14 GMT
+Content-Type: text/plain; charset=utf-8
+Transfer-Encoding: chunked
+Connection: keep-alive
+
+# HELP apisix_batch_process_entries batch process remaining entries
+# TYPE apisix_batch_process_entries gauge
+apisix_batch_process_entries{name="http logger",route_id="1",server_addr="172.19.0.8"} 0
+# HELP apisix_etcd_modify_indexes Etcd modify index for APISIX keys
+# TYPE apisix_etcd_modify_indexes gauge
+apisix_etcd_modify_indexes{key="consumers"} 17819
+apisix_etcd_modify_indexes{key="global_rules"} 17832
+apisix_etcd_modify_indexes{key="max_modify_index"} 20028
+apisix_etcd_modify_indexes{key="prev_index"} 18963
+apisix_etcd_modify_indexes{key="protos"} 0
+apisix_etcd_modify_indexes{key="routes"} 20028
+apisix_etcd_modify_indexes{key="services"} 0
+apisix_etcd_modify_indexes{key="ssls"} 0
+apisix_etcd_modify_indexes{key="stream_routes"} 0
+apisix_etcd_modify_indexes{key="upstreams"} 7342
+apisix_etcd_modify_indexes{key="x_etcd_index"} 20033
+
+...
+----
+
+And we can also check the status of our endpoint at Prometheus dashboard by pointing to this
+URL `http://localhost:9090/targets`
+
+image::prometheus-plugin-dashboard-screenshot.png[]
+
+As you can see, Apache APISIX exposed metrics endpoint is upon and running.
+
+Now you can query metrics for `apisix_http_status` to see what http requests are handled by API Gateway and what was outcome.
+
+image::prometheus-plugin-dashboard-query-http-status-screenshot.png[]
+
+image::prometheus-plugin-dashboard-query-http-status-table-screenshot.png[]
+
+[NOTE]
+====
+Metrics exported by the plugin can be visualized in Grafana using a drop in https://grafana.com/grafana/dashboards/11719[Apache APISIX Grafana Dashboard Template^]
+====
+
+In addition to this, you can view Grafana dashboard running in your local instance. Go to `http://localhost:3000/`
+
+image::prometheus-plugin-grafana-dashboard-screenshot.png[]
+
+Behind the scene, Apache APISIX downloads https://github.com/apache/apisix/blob/master/docs/assets/other/json/apisix-grafana-dashboard.json[Grafana dashboard meta], imports it to Grafana and fetches real time metrics from Prometheus plugin.
+
+
+
 == Other plugins
 
 === Disabling and removing a plugin
@@ -1075,125 +1205,6 @@ https://mockbin.org/bin/5451b7cd-af27-41b8-8df1-282ffea13a61/log
 As you can see, some recent logs are sent to our mock server:
 
 image::http-logger-plugin-test-screenshot.png[]
-
-=== Prometheus plugin
-
-API monitoring is the process of collecting and analyzing data about the performance of an API to identify problems that impact users. If an application is running slowly, you must first understand the cause before you can correct it.
-
-Metrics are a numeric representation of data measured over intervals of time. You can also aggregate this data into daily or weekly frequency and run queries against a distributed system like Elasticsearch. Or sometimes based on metrics you trigger alerts to take any action later. Once API metrics are collected, you can track them with metrics tracking tools such as Prometheus.
-
-[INFO]
-====
-https://apisix.apache.org/docs/apisix/plugins/prometheus/[Prometheus plugin^]
-can fetch API metrics data and you can show metrics exported by the plugin in https://grafana.com/[Grafana^].
-====
-
-Let's enable `prometheus` plugin for our route:
-
-[source,bash]
-----
-curl http://127.0.0.1:9080/apisix/admin/routes/1  -H 'X-API-KEY: edd1c9f034335f136f87ad84b625c8f1' -X PUT -d '
-{
-    "uri": "/get",
-    "plugins": {
-        "prometheus":{}
-    },
-    "upstream_id": "1"
-}'
-----
-
-[NOTE]
-====
-When set _prefer_name_ to true in the request attribute, it will print route/service name instead of id in Prometheus metric.
-====
-
-Response:
-
-[source,json5]
-----
-{
-  "node": {
-    "value": {
-      "update_time": 1648206467,
-      "uri": "/get",
-      "create_time": 1646341656,
-      "status": 1,
-      "priority": 0,
-      "plugins": {
-        "prometheus": {
-          "prefer_name": false
-        }
-      },
-      "upstream_id": "1",
-      "id": "1"
-    },
-    "key": "/apisix/routes/1"
-  },
-  "action": "set"
-}
-----
-
-We fetch the metric data from the specified url `/apisix/prometheus/metrics`.
-
-[source,bash]
-----
-curl -i http://127.0.0.1:9091/apisix/prometheus/metrics
-----
-
-You will get response with Prometheus metrics something like below:
-
-[source,text]
-----
-HTTP/1.1 200 OK
-Server: openresty
-Date: Fri, 25 Mar 2022 11:13:14 GMT
-Content-Type: text/plain; charset=utf-8
-Transfer-Encoding: chunked
-Connection: keep-alive
-
-# HELP apisix_batch_process_entries batch process remaining entries
-# TYPE apisix_batch_process_entries gauge
-apisix_batch_process_entries{name="http logger",route_id="1",server_addr="172.19.0.8"} 0
-# HELP apisix_etcd_modify_indexes Etcd modify index for APISIX keys
-# TYPE apisix_etcd_modify_indexes gauge
-apisix_etcd_modify_indexes{key="consumers"} 17819
-apisix_etcd_modify_indexes{key="global_rules"} 17832
-apisix_etcd_modify_indexes{key="max_modify_index"} 20028
-apisix_etcd_modify_indexes{key="prev_index"} 18963
-apisix_etcd_modify_indexes{key="protos"} 0
-apisix_etcd_modify_indexes{key="routes"} 20028
-apisix_etcd_modify_indexes{key="services"} 0
-apisix_etcd_modify_indexes{key="ssls"} 0
-apisix_etcd_modify_indexes{key="stream_routes"} 0
-apisix_etcd_modify_indexes{key="upstreams"} 7342
-apisix_etcd_modify_indexes{key="x_etcd_index"} 20033
-
-...
-----
-
-And we can also check the status of our endpoint at Prometheus dashboard by pointing to this
-URL `http://localhost:9090/targets`
-
-image::prometheus-plugin-dashboard-screenshot.png[]
-
-As you can see, Apache APISIX exposed metrics endpoint is upon and running.
-
-Now you can query metrics for `apisix_http_status` to see what http requests are handled by API Gateway and what was outcome.
-
-image::prometheus-plugin-dashboard-query-http-status-screenshot.png[]
-
-image::prometheus-plugin-dashboard-query-http-status-table-screenshot.png[]
-
-[NOTE]
-====
-Metrics exported by the plugin can be visualized in Grafana using a drop in https://grafana.com/grafana/dashboards/11719[Apache APISIX Grafana Dashboard Template^]
-====
-
-In addition to this, you can view Grafana dashboard running in your local instance. Go to `http://localhost:3000/`
-
-image::prometheus-plugin-grafana-dashboard-screenshot.png[]
-
-Behind the scene, Apache APISIX downloads https://github.com/apache/apisix/blob/master/docs/assets/other/json/apisix-grafana-dashboard.json[Grafana dashboard meta], imports it to Grafana and fetches real time metrics from Prometheus plugin.
 
 === Zipkin Plugin
 
