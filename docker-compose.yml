@@ -9,6 +9,7 @@ services:
     ports:
       - "9080:9080"
       - "9180:9180"
+      - "9091:9091"
 
   apisix-dashboard:
     image: apache/apisix-dashboard:3.0.1-centos

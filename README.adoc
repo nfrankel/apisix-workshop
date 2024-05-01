@@ -787,114 +787,81 @@ The existing infrastructure is already ready for this:
 include::conf/apisix/config.yaml[lines=27..31]
 ----
 
-However, we need to enable the plugin for our `Route`.
+You can try to query the Prometheus metrics:
 
 [source,bash]
 ----
-curl http://127.0.0.1:9080/apisix/admin/routes/1  -H 'X-API-KEY: edd1c9f034335f136f87ad84b625c8f1' -X PUT -d '
-{
-    "uri": "/get",
-    "plugins": {
-        "prometheus":{}
-    },
-    "upstream_id": "1"
-}'
+curl http://localhost:9091/apisix/prometheus/metrics
 ----
 
-[NOTE]
-====
-When set _prefer_name_ to true in the request attribute, it will print route/service name instead of id in Prometheus metric.
-====
+The response should be a long list of metrics in the Prometheus format:
 
-Response:
-
-[source,json5]
 ----
-{
-  "node": {
-    "value": {
-      "update_time": 1648206467,
-      "uri": "/get",
-      "create_time": 1646341656,
-      "status": 1,
-      "priority": 0,
-      "plugins": {
-        "prometheus": {
-          "prefer_name": false
-        }
-      },
-      "upstream_id": "1",
-      "id": "1"
-    },
-    "key": "/apisix/routes/1"
-  },
-  "action": "set"
-}
-----
-
-We fetch the metric data from the specified url `/apisix/prometheus/metrics`.
-
-[source,bash]
-----
-curl -i http://127.0.0.1:9091/apisix/prometheus/metrics
-----
-
-You will get response with Prometheus metrics something like below:
-
-[source,text]
-----
-HTTP/1.1 200 OK
-Server: openresty
-Date: Fri, 25 Mar 2022 11:13:14 GMT
-Content-Type: text/plain; charset=utf-8
-Transfer-Encoding: chunked
-Connection: keep-alive
-
-# HELP apisix_batch_process_entries batch process remaining entries
-# TYPE apisix_batch_process_entries gauge
-apisix_batch_process_entries{name="http logger",route_id="1",server_addr="172.19.0.8"} 0
 # HELP apisix_etcd_modify_indexes Etcd modify index for APISIX keys
 # TYPE apisix_etcd_modify_indexes gauge
-apisix_etcd_modify_indexes{key="consumers"} 17819
-apisix_etcd_modify_indexes{key="global_rules"} 17832
-apisix_etcd_modify_indexes{key="max_modify_index"} 20028
-apisix_etcd_modify_indexes{key="prev_index"} 18963
+apisix_etcd_modify_indexes{key="consumers"} 27
+apisix_etcd_modify_indexes{key="global_rules"} 31
+apisix_etcd_modify_indexes{key="max_modify_index"} 31
+apisix_etcd_modify_indexes{key="prev_index"} 44
 apisix_etcd_modify_indexes{key="protos"} 0
-apisix_etcd_modify_indexes{key="routes"} 20028
+apisix_etcd_modify_indexes{key="routes"} 30
 apisix_etcd_modify_indexes{key="services"} 0
 apisix_etcd_modify_indexes{key="ssls"} 0
 apisix_etcd_modify_indexes{key="stream_routes"} 0
-apisix_etcd_modify_indexes{key="upstreams"} 7342
-apisix_etcd_modify_indexes{key="x_etcd_index"} 20033
-
-...
+apisix_etcd_modify_indexes{key="upstreams"} 15
+apisix_etcd_modify_indexes{key="x_etcd_index"} 44
+# HELP apisix_etcd_reachable Config server etcd reachable from APISIX, 0 is unreachable
+# TYPE apisix_etcd_reachable gauge
+apisix_etcd_reachable 1
 ----
 
-And we can also check the status of our endpoint at Prometheus dashboard by pointing to this
-URL `http://localhost:9090/targets`
+Behind the scene, a Prometheus instance is querying the page at regular intervals.
+This is the existing Prometheus jobs configuration:
 
-image::prometheus-plugin-dashboard-screenshot.png[]
+[source,yaml]
+./etc/prometheus/prometheus.yml
+----
+include::./conf/prometheus/prometheus.yml[]
+----
 
-As you can see, Apache APISIX exposed metrics endpoint is upon and running.
+However, we need to add the plugin to our existing `Route` *and for every other future `Route` we create*.
+It's a possible approach when you have a _very_ limited number of `Route` objects.
+However, the more `Route` objects you create, the more you run the risk of forgetting to add `prometheus` to it.
+Given Murphy's Law, it will be the one `Route` we will need metrics on.
 
-Now you can query metrics for `apisix_http_status` to see what http requests are handled by API Gateway and what was outcome.
+For this use case, Apache APISIX offers another abstraction, `Global Rule`.
+A `Global Rule` is a regular `Plugin` with the difference that it's applied to *every `Route` by default*;
+you can still disable it on a per-`Route` basis.
 
-image::prometheus-plugin-dashboard-query-http-status-screenshot.png[]
+With the help of the https://apisix.apache.org/docs/apisix/admin-api/#global-rule-api[Admin API^], add the `prometheus` plugin as `Global Rule`.
 
-image::prometheus-plugin-dashboard-query-http-status-table-screenshot.png[]
-
-[NOTE]
+.See the command
+[%collapsible]
 ====
-Metrics exported by the plugin can be visualized in Grafana using a drop in https://grafana.com/grafana/dashboards/11719[Apache APISIX Grafana Dashboard Template^]
+[source,bash]
+----
+include::{commandsdir}/15_set_prometheus_global_rule.sh[]
+----
 ====
 
-In addition to this, you can view Grafana dashboard running in your local instance. Go to `http://localhost:3000/`
+Send a couple of requests:
 
-image::prometheus-plugin-grafana-dashboard-screenshot.png[]
+[source,bash]
+----
+curl localhost:9080/anything
+----
 
-Behind the scene, Apache APISIX downloads https://github.com/apache/apisix/blob/master/docs/assets/other/json/apisix-grafana-dashboard.json[Grafana dashboard meta], imports it to Grafana and fetches real time metrics from Prometheus plugin.
+A Grafana instance is already running on the infrastructure.
+Go to `http://localhost:3000/` to view the dashboard.
 
+image::grafana-dashboard.png[]
 
+It's the default Apache APISIX Grafana dashboard.
+Grafana users are actively encouraged to customize it to cater to their specific needs.
+
+=== Logs
+
+=== Traces
 
 == Other plugins
 
