@@ -315,12 +315,12 @@ image:dashboard-routes-list-updated.png[]
 This is but a taste of the Apache APISIX Dasboard.
 We continue the workshop with the CLI.
 
-== Learning about `Consumer` and `Plugin` via an authentication use case
+== Authenticating client requests
 
 The `Route` we have created above is public.
 Thus, anyone can access the underlying `Upstream` as long as they know the endpoint Apache APISIX exposes to the outside world.
 It's not safe, as a malicious actor could use this endpoint.
-In this section, we are going to set up authentication for our requests to `httpbin`.
+In this section, we are going to set up authentication for requests to our local `httpbin` `Upstream`.
 
 === Create a `Consumer`
 
@@ -481,10 +481,9 @@ Server: APISIX/3.9.0
 
 In this section, we learned about the `Consumer` and `Plugin` objects, and how to implement a simple authentication mechanism with the `key-auth` plugin.
 
-== More plugins goodness
+== Managing quotas
 
-As mentioned above, lots of APISIX features are implemented via plugins.
-In this section, we are going to browse and use a couple of them across different use cases.
+In this section, we are going to describe several ways to set quotas on your APIs.
 
 === Limit Count Plugin
 
@@ -532,6 +531,14 @@ curl -H 'apikey: john' localhost:9080/anything
 
 The first request should work, but the second one should return a `429` status code.
 
+Notice that the response contains additional headers to help clients understand where they stand:
+
+----
+X-RateLimit-Limit: 1
+X-RateLimit-Remaining: 0
+X-RateLimit-Reset: 56
+----
+
 [INFO]
 ====
 You also can complete the above operation through the web interface by adding the `limit-count` plugin:
@@ -539,7 +546,186 @@ You also can complete the above operation through the web interface by adding th
 image::dashboard-limit-count-plugin.png[]
 ====
 
+=== Promoting a `Consumer`
+
+In the previous section, we set a cap on the number of requests for all consumers.
+However, a real-world scenario is to offer different limits at different prices.
+For instance, a free tier could offer 100 requests per minute, while a premium tier could offer 1000 requests per minute.
+In this section, we are going to create a new `Consumer` object and set its limit to 5.
+
+Using the https://apisix.apache.org/docs/apisix/admin-api/#consumer-api[Admin API^], create a new `Consumer` object with the following properties:
+
+* Name: `janedoe`
+* Key: `jane`
+* Plugin: `limit-count` with a limit of 5 requests per minute
+
+.See the command
+[%collapsible]
+====
+[source,bash]
+----
+include::{commandsdir}/9_create_consumer_with_higher_limit.sh[]
+----
+====
+
+To test, run the following script:
+
+[source,bash]
+----
+for i in {1..6}
+do
+   curl -H 'apikey: jane' localhost:9080/anything
+done
+----
+
+The first five executions return a bunch of JSON from `httpbin`, but the sixth one should return a `429` status code:
+
+[source,json]
+----
+{"error_msg":"Youve exceeded your quota, try again later"}
+----
+
 === Consumer groups
+
+Real-world scenarios rarely assign privileges to a specific user but to a group.
+Hence, a user gets their privileges transitively by belonging to a group.
+It helps tremendously when users moves in to/out from the group.
+To model this, Apache APISIX offers an abstraction called a `Consumer Group`.
+In this section, we are going to create a `Consumer Group` with a high limit and move `johndoe` and `janedoe` to it.
+
+First, let's create a `Consumer Group` with ID `1` and a limit of 5 requests per minute.
+The https://apisix.apache.org/docs/apisix/admin-api/#consumer-group-api[Admin API^] is your friend.
+
+.See the command
+[%collapsible]
+====
+[source,bash]
+----
+include::{commandsdir}/10_create_consumer_group_with_higher_limit.sh[]
+----
+====
+
+Then, remove the `limit-count` plugin from `janedoe` with the help of the https://apisix.apache.org/docs/apisix/admin-api/#consumer-api[Admin API^] and *add* it to the `Consumer Group` created.
+Also, add `johndoe` to the `Consumer Group`.
+Note that the API doesn't offer a `PATCH` method; you'll need to replace the whole object with `PUT`.
+
+.See the command
+[%collapsible]
+====
+[source,bash]
+----
+include::{commandsdir}/11_remove_limit_from_consumer.sh[]
+----
+====
+
+We can now test with the follow script:
+
+[source,bash]
+----
+for i in {1..3}
+do
+   curl -H 'apikey: john' localhost:9080/anything
+   curl -H 'apikey: jane' localhost:9080/anything
+done
+----
+
+As above, the 6^th^ request should return a `429` status code.
+However, the limit is shared between both `Consumer` objects as they belong to the same `Consumer Group`.
+
+== Handling permissions
+
+In the previous sections, we have seen how to set quotas on the number of requests.
+We can also set permissions to allow/disallow specific users/user groups to access our API.
+This is the realm of the https://apisix.apache.org/docs/apisix/plugins/consumer-restriction/[consumer-restriction^] plugin.
+
+At the moment, we have a single endpoint.
+Anybody can access it, even though it's limited to one request per minute.
+We also have two `Consumer` objects that belong to the same `Consumer Group`.
+
+In this section, we are going to limit the access to the endpoint to a single `Consumer` object, then to the whole `Consumer Group`.
+Read the https://apisix.apache.org/docs/apisix/plugins/consumer-restriction/[relevant documentation^] and limit the acces to the endpoint to `johndoe`.
+
+.See the command
+[%collapsible]
+====
+[source,bash]
+----
+include::{commandsdir}/12_restrict_route_to_consumer.sh[]
+----
+====
+
+Try to access the endpoint with both `Consumer` objects:
+
+[source,bash]
+----
+curl -H 'apikey: john' localhost:9080/anything
+curl -H 'apikey: jane' localhost:9080/anything
+----
+
+The first command should work while the second one should return a `403` status code - the default one.
+
+Now, change the restriction from the `Consumer` object to the `Consumer Group`.
+Beware, you need to set an additional parameter.
+You can find it in the https://apisix.apache.org/docs/apisix/plugins/consumer-restriction/[plugin documentation^].
+
+.See the command
+[%collapsible]
+====
+[source,bash]
+----
+include::{commandsdir}/12_restrict_route_to_consumer.sh[]
+----
+====
+
+Try again to access the endpoint:
+
+[source,bash]
+----
+curl -H 'apikey: john' localhost:9080/anything
+curl -H 'apikey: jane' localhost:9080/anything
+----
+
+Now, both commands should work because the two `Consumer` objects belong to the configured `Consumer Group`.
+
+The `consumer-restriction` plugin is quite powerful.
+You can design your access policy around it.
+Here's a simple example:
+
+[source,bash]
+----
+curl http://localhost:9180/apisix/admin/routes/1/plugins/consumer-restriction -H 'X-API-KEY: edd1c9f034335f136f87ad84b625c8f1' -X PUT -d '
+{
+  "type": "consumer_group_id",
+  "allowed_by_methods": [
+    {
+      "user": "users",                            <1>
+      "methods": ["GET"]                          <1>
+    },
+    {
+      "user": "admins",                           <2>
+      "methods": ["GET", "POST", "PUT", "PATCH"]  <2>
+    }
+  ]
+}'
+----
+
+<1> `Consumer` objects that belong to the `users` `Consumer Group` can only `GET`
+<2> `Consumer` objects that belong to the `users` `Consumer Group` can do pretty much everything
+
+[WARNING]
+====
+The `consumer-restriction` plugin offers both a `whitelist` and a `blacklist` configuration parameter.
+Security-minded people should always prefer the former to the latter.
+====
+
+Apache APISIX offers other security-oriented plugins:
+
+* https://apisix.apache.org/docs/apisix/plugins/uri-blocker[URI Blocker^]: Prevents user requests from accessing sensitive URI resources
+* https://apisix.apache.org/docs/apisix/plugins/ip-restriction/[IP Restriction^]: Prevents access from some an IP address or a list thereof
+* https://apisix.apache.org/docs/apisix/plugins/cors[CORS^]: Allows developers to make cross-domain requests from the browser in a controlled way
+* https://apisix.apache.org/docs/apisix/plugins/csrf[CSRF^]: Based on the Double Submit Cookie way, protects your API from CSRF attacks.
+
+== Other plugins
 
 === Disabling and removing a plugin
 
@@ -547,10 +733,7 @@ Before diving in further, we need to learn how to disable and remove a plugin.
 
 * Disabling a plugin means that it's still there along, but APISIX won't execute it the plugin chain
 * Removing a plugin means that it's gone, along with its configuration.
-If you want to add it again, you'll need to configure it from scratch.
-You can remove a `Plugin` on a `Route` in two ways:
-** Use `PUT` to completely replace the existing `Route`
-** Use `PATCH` to only remove the selected plugin by setting it to `null`
+If you want to add it again, you'll need to set its configuration from scratch.
 
 For learning purposes, having to set the `apiky` header to authenticate each request is cumbersome.
 Let's remove the `key-auth` plugin we added in the previous section.
@@ -561,7 +744,7 @@ Read the https://docs.api7.ai/apisix/reference/plugin-common-configurations#_met
 ====
 [source,bash]
 ----
-include::{commandsdir}/8_disable_plugin.sh[]
+include::{commandsdir}/12_disable_plugin.sh[]
 ----
 
 <1> Path to the `key-auth` plugin, _i.e._, `/routes/1/plugins/key-auth`
@@ -794,193 +977,6 @@ We have validated the client's identity attempting to request by using various h
 [TIP]
 ====
 A https://youtu.be/kbELyQIXAsw[Centralized Authentication with Apache APISIX Plugins^] video tutorial describes different authentication methods, overviews the use-cases and benefits of centralized authentication with Apache APISIX API Gateway and you will learn how to configure common authentication plugins like basic, key, and JWT to protect your services.
-====
-
-=== Consumer Restriction Plugin
-
-In our modern era, API security has become increasingly important.
-Many hardening techniques are available:
-
-* TLS encryption
-* API Firewalls
-* Validating request data
-* Throttling for protection
-* Continuously monitoring
-* Auditing
-* Logging
-* IP restriction
-
-An API Gateway can handle all those cross-cutting concerns.
-
-[INFO]
-====
-One of the techniques is to make corresponding access restrictions to API resources for specific users or services.
-https://apisix.apache.org/docs/apisix/plugins/ip-restriction/[Consumer Restriction^] (_consumer-restriction_)
-– makes corresponding
-access restrictions to your services or routes based on different users selected.
-If unknown user tries to send a request, Apache APISIX will meet them with an error.
-
-====
-
-Assume that we have two consumers of our APIs (`jack2019` and `jack2020`). We want to give an access only to one of them.
-To do so, let's create two consumers and enable `consumer-restriction` plugin for our existing _Example route_.
-
-To create the first consumer, run the following command:
-
-[source,bash]
-----
-curl http://127.0.0.1:9080/apisix/admin/consumers -H 'X-API-KEY: edd1c9f034335f136f87ad84b625c8f1' -X PUT -i -d '
-{
-    "username": "jack1",
-    "plugins": {
-        "basic-auth": {
-            "username":"jack2019",
-            "password": "123456"
-        }
-    }
-}'
-----
-
-To create the second consumer, run the following command:
-
-[source,bash]
-----
-curl http://127.0.0.1:9080/apisix/admin/consumers -H 'X-API-KEY: edd1c9f034335f136f87ad84b625c8f1' -X PUT -i -d '
-{
-    "username": "jack2",
-    "plugins": {
-        "basic-auth": {
-            "username":"jack2020",
-            "password": "123456"
-        }
-    }
-}'
-----
-
-Then, enable `consumer-restriction` plugin:
-
-[source,bash]
-----
-curl http://127.0.0.1:9080/apisix/admin/routes/1 -H 'X-API-KEY: edd1c9f034335f136f87ad84b625c8f1' -X PUT -d '
-{
-    "uri": "/get",
-    "plugins": {
-        "basic-auth": {},
-        "consumer-restriction": {
-            "whitelist": [
-                "jack1"
-            ]
-        }
-    },
-    "upstream_id": "1"
-}'
-----
-
-Output:
-
-[source,json]
-----
-{
-  "node": {
-    "key": "\/apisix\/routes\/1",
-    "value": {
-      "status": 1,
-      "update_time": 1653144236,
-      "create_time": 1653138186,
-      "priority": 0,
-      "plugins": {
-        "consumer-restriction": {
-          "whitelist": [
-            "jack1"
-          ],
-          "rejected_code": 403,
-          "type": "consumer_name"
-        }
-      },
-      "uri": "\/get",
-      "id": "1",
-      "upstream_id": "1"
-    }
-  },
-  "action": "set"
-}
-----
-
-[TIP]
-====
-
-The `consumer-restriction` has the _type_ property which is enumerated type (it support the following values:
-_consumer_name_, _service_id_ and _route_id_), we can specify it to allow access to correspond object.
-
-
-By default, the plugin returns a generic `{"message":"The consumer_name is forbidden."}` if the object is not allowed.
-It's possible to configure a more friendly message via the plugin attribute.
-====
-
-Now we can test if the consumer _jack1_ can request the API resource with the provided credentials.
-
-[source,bash]
-----
-curl -u jack2019:123456 http://127.0.0.1:9080/get
-----
-
-Output:
-
-[source,json5]
-----
-{
-  "args": {},
-  "headers": {
-    "Accept": "*/*",
-    "Authorization": "Basic amFjazIwMTk6MTIzNDU2",
-    "Host": "127.0.0.1",
-    "User-Agent": "curl/7.79.1",
-    "X-Amzn-Trace-Id": "Root=1-6288fe68-0b820d5c62c90f860e7266da",
-    "X-Forwarded-Host": "127.0.0.1"
-  },
-  "origin": "172.20.0.1, 85.253.33.40",
-  "url": "http://127.0.0.1/get"
-}
-----
-
-Now we can try to request the same path with different consumer:
-
-[source,bash]
-----
-curl -u jack2020:123456 http://127.0.0.1:9080/get
-----
-
-However, our the second consumer has no access.
-
-Output:
-
-[source,json]
-----
-{"message":"The consumer_name is forbidden."}
-----
-
-It is also possible to disable a plugin, we can delete the corresponding JSON configuration from the plugin configuration.
-*Apache APISIX supports hot reloading*; there's no need to restart the service!
-
-[source,bash]
-----
-curl http://127.0.0.1:9080/apisix/admin/routes/1 -H 'X-API-KEY: edd1c9f034335f136f87ad84b625c8f1' -X PUT -d '
-{
-    "uri": "/get",
-    "plugins": {},
-    "upstream_id": "1"
-}'
-----
-
-[INFO]
-====
-There are other security plugins are offered by Apache APISIX too.
-
-- **https://apisix.apache.org/docs/apisix/plugins/cors[CORS^]** – Enable https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS[CORS^] easily to allow developers to make requests from the browser.
-- **https://apisix.apache.org/docs/apisix/plugins/uri-blocker[URI Blocker^]** (_uri-blocker_)–  Intercepts user requests and blocks uri resources.
-- **https://apisix.apache.org/docs/apisix/plugins/ip-restriction/[IP Restriction^]** (_consumer-restriction_) – technique is to limit the IPs of clients that can send requests
-by whitelisting/blacklisting IP addresses list.
-- **https://apisix.apache.org/docs/apisix/plugins/csrf[CSRF^]** – Based on the Double Submit Cookie way, protects your API from CSRF attacks.
 ====
 
 === HTTP Logger Plugin
