@@ -31,9 +31,9 @@ The workshop is designed to be self-driven, but if at any point, you need help, 
 toc::[]
 
 [NOTE]
+.Credits
 ====
 The workshop was initially designed by Bobur Umurzukov with my help.
-Thanks for all his hard work!
 ====
 
 [discrete]
@@ -118,7 +118,7 @@ It should return something similar to:
 ----
 
 [IMPORTANT]
-.Keep APISIX secure!
+.Be mindful of keeping APISIX secure
 ====
 The Admin API, _e.g._, the command to list all routes, is normally secured by an API key.
 In the context of this workshop, this security feature has been disabled to avoid extra typing.
@@ -149,6 +149,7 @@ When Apache APISIX receives a request matching the `Route` parameters, it forwar
 === Dynamic configuration vs. static configuration
 
 [NOTE]
+.Configuration or configuration?
 ====
 In the context of APISIX, configuration can mean two things:
 configuration of APISIX itself or configuration of its routing rules.
@@ -227,7 +228,7 @@ With the help of the https://apisix.apache.org/docs/apisix/admin-api/#upstream-a
 * Single node
 * The node points to `httpbin:80`
 
-.See the solution
+.See the command
 [%collapsible]
 ====
 [source,bash]
@@ -280,13 +281,14 @@ If you have time, the Getting started with Apache APISIX Dashboard video tutoria
 video::-9-HZKK2ccI[youtube,width=840,height=470]
 
 [NOTE]
+. The Dashboard uses the Admin API
 ====
-The dashboard sends Admin API calls under the cover.
+The Dashboard sends Admin API requests behind the scenes.
 You can verify this claim by interacting with the dashboard with your favorite's browser tools enabled.
 Hence, whatever we do with the dashboard, we can do with the Admin API.
 
 The reverse is not true:
-the dashboard doesn't cover every possible API call.
+the Dashboard doesn't cover every API call available.
 ====
 
 Remember that though the backend service could implement it, it's more efficient to factor this feature in the API Gateway than to implement it in every service.
