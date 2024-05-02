@@ -584,12 +584,48 @@ X-RateLimit-Reset: 56          <3>
 <2> The remaining number of requests allowed
 <3> The time in seconds until the limit resets
 
-[INFO]
-====
-You also can complete the above operation through the web interface by adding the `limit-count` plugin:
+=== Using the Dashboard to set the limit
 
-image::dashboard-limit-count-plugin.png[]
-====
+As an alternative to the above, we can use the Dashboard to set the `limit-count` plugin on the `Route`.
+
+. Go to the http://localhost:9000/[Dashboard^]
+. Click on the btn:[Route] menu item
+. Press btn:[Configure] on the `Route` you want to add the `Plugin` to
+. In the first screen of the wizard, we need to fill in the name if it's not already the case
++
+.Configure Route wizard - Define API request
+image::plugin-configure-route.png[Configure Route wizard - Define API request]
+. Click btn:[Next]
+. On the next screen, labeled "Define API Backend Server", we need to select `1` in the Upstream field drop-down
+. Click btn:[Next]
+. Finally, on the third screen, the Dashboard presents the list of available plugins
++
+.Configure Route wizard - List of available plugins
+image::plugin-list.png[Configure Route wizard - List of available plugins]
+. Select the menu:Traffic Control[] menu item on the left inner menu
+. The UI scrolls to show us the available plugins in this category
++
+.Configure Route wizard - Traffic control plugins
+image::plugin-traffic-control.png[Configure Route wizard - Traffic control plugins]
+. Press btn:[Enable] on the `limit-count` plugin
+** Switch on the btn:[Enable] toggle button
+** Set the `count` field to `1`
+** Set the `time_window` field to `60`
+** Set the `rejected_code` field to `429`
+** Set the `rejected_message` field to `You have exceeded your quota, try again later`
++
+.Configure Route wizard - Plugin editor
+image::plugin-editor.png[Configure Route wizard - Plugin editor,700,691]
+** Click btn:[Submit]
+. The wizard puts us back on the third step, but the configured plugin should be displayed differently
++
+.Configure Route wizard - Plugin enabled
+image:;plugin-list-enabled.png[Configure Route wizard - Plugin enabled]
+. Press btn:[Next]
+. Click btn:[Submit] to finish the wizard
++
+.Configure Route wizard - Success!
+image::plugin-finish-success.png[Configure Route wizard - Success!]
 
 === Promoting a `Consumer`
 
