@@ -575,10 +575,14 @@ The first request should work, but the second one should return a `429` status c
 Notice that the response contains additional headers to help clients understand where they stand:
 
 ----
-X-RateLimit-Limit: 1
-X-RateLimit-Remaining: 0
-X-RateLimit-Reset: 56
+X-RateLimit-Limit: 1           <1>
+X-RateLimit-Remaining: 0       <2>
+X-RateLimit-Reset: 56          <3>
 ----
+
+<1> The limit we set (per minute)
+<2> The remaining number of requests allowed
+<3> The time in seconds until the limit resets
 
 [INFO]
 ====
