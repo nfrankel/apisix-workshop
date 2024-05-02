@@ -32,6 +32,8 @@ services:
     image: prom/prometheus:v2.51.2
     volumes:
       - ./conf/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+  loki:
+    image: grafana/loki:3.0.0
   grafana:
     image: grafana/grafana:10.4.2
     ports:

@@ -24,6 +24,7 @@ plugins:
   - azure-functions
   - public-api
   - consumer-restriction
+  - loki-logger
 
 plugin_attr:
   prometheus:

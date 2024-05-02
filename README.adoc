@@ -860,9 +860,9 @@ Apache APISIX offers a `prometheus` plugin that exposes metrics in the Prometheu
 The existing infrastructure is already ready for this:
 
 [source,yaml]
-./usr/local/apisix/conf/config.yaml
+.docker-compose.yml
 ----
-include::conf/apisix/config.yaml[lines=27..31]
+include::docker-compose.yml[lines=31..34]
 ----
 
 You can try to query the Prometheus metrics:
@@ -938,6 +938,80 @@ It's the default Apache APISIX Grafana dashboard.
 Grafana users are actively encouraged to customize it to cater to their specific needs.
 
 === Logs
+
+Logs are another widespread pillar of Observability.
+At another time, we configured our systems to write logs to files.
+When something unexpected happened, we logged to the remote server, browsed through the files, and searched for the time the issue happened.
+It's not that easy nowadays;
+with systems becoming more and more distributed, you will need to connect to multiple servers.
+Worse, with containerization, the server might not exist anymore!
+
+[.right]
+image:icon_loki.svg[Loki logo,200,200]
+
+For these reasons, the current standard is to set up a centralized logging systems.
+In this workshop, I'll use Grafana Labs' https://https://grafana.com/oss/loki/[Loki^].
+As for Prometheus, the existing infrastructure already offers a Loki instance:
+
+[source,yaml]
+.docker-compose.yml
+----
+include::docker-compose.yml[lines=35..36]
+----
+
+We want *all* our requests to send logs to Loki.
+Fortunately, Apache APISIX offers a https://apisix.apache.org/docs/apisix/plugins/loki-logger/[loki-logger^] plugin.
+
+It's a good time to remember about our the https://apisix.apache.org/docs/apisix/terminology/global-rule/[Global Rule^].
+We can either create another `Global Rule` or update the existing one to send logs to Loki.
+Let's choose to group all observability plugin in the same rule.
+With the https://apisix.apache.org/docs/apisix/admin-api/#global-rule-api[Admin API^], add the `loki-logger` plugin to the `Global Rule` with ID `1`.
+In the Docker Compose file, Loki is available at `http://loki:3100/`.
+
+.See the command
+[%collapsible]
+====
+[source,bash]
+----
+include::{commandsdir}/16_set_loki_global_rule.sh[]
+----
+====
+
+Now, we can send a couple of requests:
+
+[source,bash]
+----
+for i in {1..10}
+do
+   curl localhost:9080/anything
+done
+----
+
+We can now check if everything works as expected.
+Grafana is already configured with the Loki datasource.
+
+. Go to `http://localhost:3000/`
+. In the upper right corner, click on "Sign in"
+. Use the default `admin/admin` credentials.
+We can now explore data.
+. Find the menu:Explore[] on the left side or click on `http://localhost:3000/explore`
+. Select the _Loki_ data source in the upper menu
++
+.Grafana Explore - Loki data source
+image::loki-explore.png[Grafana Explore - Loki data source]
+. Before going further, we need to filter the query.
+Select `job` as the key and `apisix` as the (only) value
+. Click on the btn:[Run query] button in the upper right corner
++
+.Grafana Explore - Loki query
+image::loki-query.png[Grafana Explore - Loki query]
+. If you want, you can select a log line below the graph and switch on btn:[Prettify JSON]
++
+.Grafana Explore - Log detail
+image::loki-log-json-detail.png[Grafana Explore - Log detail]
++
+The above is the default JSON sent by Apache APISIX.
+It's *fully* customizable.
 
 === Traces
 
