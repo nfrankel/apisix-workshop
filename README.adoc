@@ -1030,7 +1030,6 @@ It's *fully* customizable.
 * https://apisix.apache.org/docs/apisix/plugins/rocketmq-logger/[rocketmq-logger^]: Pushes JSON-formatted logs to a https://rocketmq.apache.org/[Apache RocketMQ^] cluster
 ====
 
-
 === Traces
 
 == Other plugins
@@ -1260,96 +1259,6 @@ We have validated the client's identity attempting to request by using various h
 ====
 A https://youtu.be/kbELyQIXAsw[Centralized Authentication with Apache APISIX Plugins^] video tutorial describes different authentication methods, overviews the use-cases and benefits of centralized authentication with Apache APISIX API Gateway and you will learn how to configure common authentication plugins like basic, key, and JWT to protect your services.
 ====
-
-=== HTTP Logger Plugin
-
-API observability is the ability to understand system behavior and investigate the interactions between an application's components. It provides for your API tracers, metrics and loggers.
-
-The core of API observability breaks down into three key areas: structured logs, metrics, and traces. Let’s break down each pillar and learn how with Apache APISIX Plugins we can simplify these tasks.
-
-Logs are also easy to instrument and trivial step of API observability.
-An API event is logged each time an API operation is invoked. You can gain analytic insights into your API activities or debug your APIs through the logged data
-
-[INFO]
-====
-For instance, https://apisix.apache.org/docs/apisix/plugins/http-logger/#how-to-enable[HTTP logger Plugin^]
-pushes Log data requests to HTTP/HTTPS servers or sends as JSON objects to Monitoring tools.
-====
-
-The following is an example of how to enable the http-logger for our specific route.
-You could generate a mock HTTP server at http://mockbin.org/bin/create[mockbin^] to view the logs.
-
-To http-logger settings, we can just put our mock server uri address like below:
-
-[source,json5]
-----
-{"uri": "http://mockbin.org/bin/5451b7cd-af27-41b8-8df1-282ffea13a61"}
-----
-
-.See the command
-[%collapsible]
-====
-[source,bash]
-----
-include::{commandsdir}/9_http_logger_plugin_enable.sh[]
-----
-====
-
-You will get the following response:
-
-[source,json5]
-----
-{
-  "node": {
-    "value": {
-      "update_time": 1648189729,
-      "uri": "/get",
-      "create_time": 1646341656,
-      "status": 1,
-      "priority": 0,
-      "upstream_id": "1",
-      "plugins": {
-        "http-logger": {
-          "include_resp_body": false,
-          "timeout": 3,
-          "include_req_body": false,
-          "concat_method": "json",
-          "name": "http logger",
-          "auth_header": "",
-          "uri": "http://mockbin.org/bin/5451b7cd-af27-41b8-8df1-282ffea13a61",
-          "batch_max_size": 1000,
-          "max_retry_count": 0,
-          "retry_delay": 1,
-          "buffer_duration": 60,
-          "inactive_timeout": 5
-        }
-      },
-      "id": "1"
-    },
-    "key": "/apisix/routes/1"
-  },
-  "action": "set"
-}
-
-----
-
-We can send a request to this get endpoint to generate logs.
-
-[source,bash]
-----
-curl -i http://127.0.0.1:9080/get
-----
-
-Next, access your mock server logs and check logs
-
-[source,http request]
-----
-https://mockbin.org/bin/5451b7cd-af27-41b8-8df1-282ffea13a61/log
-----
-
-As you can see, some recent logs are sent to our mock server:
-
-image::http-logger-plugin-test-screenshot.png[]
 
 === Zipkin Plugin
 
