@@ -800,12 +800,14 @@ The `consumer-restriction` plugin offers both a `whitelist` and a `blacklist` co
 Security-minded people should always prefer the former to the latter.
 ====
 
-Apache APISIX offers other security-oriented plugins:
-
+[TIP]
+.Other noteworthy security-related plugins
+====
 * https://apisix.apache.org/docs/apisix/plugins/uri-blocker[URI Blocker^]: Prevents user requests from accessing sensitive URI resources
 * https://apisix.apache.org/docs/apisix/plugins/ip-restriction/[IP Restriction^]: Prevents access from some an IP address or a list thereof
 * https://apisix.apache.org/docs/apisix/plugins/cors[CORS^]: Allows developers to make cross-domain requests from the browser in a controlled way
 * https://apisix.apache.org/docs/apisix/plugins/csrf[CSRF^]: Based on the Double Submit Cookie way, protects your API from CSRF attacks.
+====
 
 == Disabling and removing a plugin
 
@@ -937,6 +939,12 @@ image::grafana-dashboard.png[]
 It's the default Apache APISIX Grafana dashboard.
 Grafana users are actively encouraged to customize it to cater to their specific needs.
 
+[TIP]
+.Another noteworthy metrics plugin
+====
+https://apisix.apache.org/docs/apisix/plugins/datadog/[datadog^]: Integrates with https://www.datadoghq.com/[Datadog^]
+====
+
 === Logs
 
 Logs are another widespread pillar of Observability.
@@ -1012,6 +1020,16 @@ image::loki-log-json-detail.png[Grafana Explore - Log detail]
 +
 The above is the default JSON sent by Apache APISIX.
 It's *fully* customizable.
+
+[TIP]
+.Other noteworthy logging plugins
+====
+* https://apisix.apache.org/docs/apisix/plugins/kafka-logger/[kafka-logger^]: Pushes JSON-formatted logs to https://kafka.apache.org/[Apache Kafka^]
+* https://apisix.apache.org/docs/apisix/plugins/clickhouse-logger/[clickhouse-logger^]: Pushes logs to the https://clickhouse.com/[ClickHouse^] database
+* https://apisix.apache.org/docs/apisix/plugins/elasticsearch-logger/[elasticsearch-logger^]: Pushes logs to https://www.elastic.co/elasticsearch[Elasticsearch^]
+* https://apisix.apache.org/docs/apisix/plugins/rocketmq-logger/[rocketmq-logger^]: Pushes JSON-formatted logs to a https://rocketmq.apache.org/[Apache RocketMQ^] cluster
+====
+
 
 === Traces
 
