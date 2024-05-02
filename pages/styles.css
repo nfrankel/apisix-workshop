@@ -459,3 +459,9 @@ details > summary::after {
 details[open] > summary::after {
     content: "";
 }
+
+.admonitionblock td.content > .title {
+    font-size: 1.2rem;
+    font-style: normal;
+    font-weight: bold;
+}

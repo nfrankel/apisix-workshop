@@ -118,8 +118,9 @@ It should return something similar to:
 ----
 
 [IMPORTANT]
+.Keep APISIX secure!
 ====
-The command to list all routes is normally secured by an API key.
+The Admin API, _e.g._, the command to list all routes, is normally secured by an API key.
 In the context of this workshop, this security feature has been disabled to avoid extra typing.
 *You should never ever use this setting in a production environement!*
 Moreover, you should change the default API key before your first deployment.
@@ -135,7 +136,8 @@ deployment:
         role: admin
 ----
 
-<1> Change back to default `true` value
+<1> The default value is `true`.
+Keep it that way.
 <2> Change the keyword to something more secure and keep it secret
 ====
 
