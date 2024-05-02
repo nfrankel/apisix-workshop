@@ -279,9 +279,9 @@ If you have time, the Getting started with Apache APISIX Dashboard video tutoria
 
 video::-9-HZKK2ccI[youtube,width=840,height=470]
 
-[IMPORTANT]
+[NOTE]
 ====
-The dashboard execute HTTP API calls under the cover.
+The dashboard sends Admin API calls under the cover.
 You can verify this claim by interacting with the dashboard with your favorite's browser tools enabled.
 Hence, whatever we do with the dashboard, we can do with the Admin API.
 
@@ -754,6 +754,7 @@ curl http://localhost:9180/apisix/admin/routes/1/plugins/consumer-restriction -X
 <2> `Consumer` objects that belong to the `users` `Consumer Group` can do pretty much everything
 
 [WARNING]
+.Prefer allowing access than disallowing it
 ====
 The `consumer-restriction` plugin offers both a `whitelist` and a `blacklist` configuration parameter.
 Security-minded people should always prefer the former to the latter.
