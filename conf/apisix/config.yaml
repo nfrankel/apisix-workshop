@@ -25,12 +25,15 @@ plugins:
   - public-api
   - consumer-restriction
   - loki-logger
-
+  - opentelemetry
 plugin_attr:
   prometheus:
     export_addr:
-      ip: "0.0.0.0"
+      ip: 0.0.0.0
       port: 9091
+  opentelemetry:
+    collector:
+      address: jaeger:4318
 
 ext-plugin:
   path_for_test: /tmp/runner.sock

@@ -793,7 +793,7 @@ curl http://localhost:9180/apisix/admin/routes/1/plugins/consumer-restriction -X
 ----
 
 <1> `Consumer` objects that belong to the `users` `Consumer Group` can only `GET`
-<2> `Consumer` objects that belong to the `users` `Consumer Group` can do pretty much everything
+<2> `Consumer` objects that belong to the `admins` `Consumer Group` can do pretty much everything
 
 [WARNING]
 .Prefer allowing access than disallowing it
@@ -819,7 +819,7 @@ Before diving in further, we need to learn how to disable and remove a plugin.
 * Removing a plugin means that it's gone, along with its configuration.
 If you want to add it again, you'll need to set its configuration from scratch.
 
-For learning purposes, having to set the `apiky` header to authenticate each request is cumbersome.
+For learning purposes, having to set the `apikey` header to authenticate each request is cumbersome.
 Let's disable the `key-auth` plugin we added in the previous section.
 Read the https://docs.api7.ai/apisix/reference/plugin-common-configurations#_metadisable[appropriate documentation^], then disable the `key-auth` plugin and remove the `consumer-restriction` one on the `Route` with ID `1`.
 Try to achieve both in one single command.
@@ -837,7 +837,7 @@ include::{commandsdir}/14_disable_plugin.sh[]
 <3> Set the `disable` meta parameter to `true`
 ====
 
-Send a request to the endpoint without an `apiky` header; it should work because the `auth-key` plugin is disabled and there is no `consumer-restriction`.
+Send a request to the endpoint without an `apikey` header; it should work because the `auth-key` plugin is disabled and there is no `consumer-restriction`.
 
 [source,bash]
 ----
@@ -934,9 +934,14 @@ curl localhost:9080/anything
 ----
 
 A Grafana instance is already running on the infrastructure.
-Go to `http://localhost:3000/` to view the dashboard.
+Go to `http://localhost:3000/` to access Grafana.
+On the lower right panel, choose the Apache APISIX dashboard.
 
-image::grafana-dashboard.png[]
+image::grafana-dashboard-apisix.webp[]
+
+The APISIX dashboard should show up:
+
+image::grafana-dashboard-for-apisix.png[]
 
 It's the default Apache APISIX Grafana dashboard.
 Grafana users are actively encouraged to customize it to cater to their specific needs.
@@ -949,7 +954,7 @@ https://apisix.apache.org/docs/apisix/plugins/datadog/[datadog^]: Integrates wit
 
 === Logs
 
-Logs are another widespread pillar of Observability.
+Logs are another common pillar of Observability.
 At another time, we configured our systems to write logs to files.
 When something unexpected happened, we logged to the remote server, browsed through the files, and searched for the time the issue happened.
 It's not that easy nowadays;
@@ -1001,27 +1006,20 @@ We can now check if everything works as expected.
 Grafana is already configured with the Loki datasource.
 
 . Go to `http://localhost:3000/`
-. In the upper right corner, click on "Sign in"
-. Use the default `admin/admin` credentials.
-We can now explore data.
-. Find the menu:Explore[] on the left side or click on `http://localhost:3000/explore`
-. Select the _Loki_ data source in the upper menu
+. In the list of available dashboards, choose Loki
 +
-.Grafana Explore - Loki data source
-image::loki-explore.png[Grafana Explore - Loki data source]
-. Before going further, we need to filter the query.
-Select `job` as the key and `apisix` as the (only) value
-. Click on the btn:[Run query] button in the upper right corner
+image::grafana-dashboard-loki.webp[]
 +
-.Grafana Explore - Loki query
-image::loki-query.png[Grafana Explore - Loki query]
-. If you want, you can select a log line below the graph and switch on btn:[Prettify JSON]
+. The already-configured Loki dashboard shows up:
 +
-.Grafana Explore - Log detail
-image::loki-log-json-detail.png[Grafana Explore - Log detail]
+image::grafana-dashboard-for-loki.png[]
 +
-The above is the default JSON sent by Apache APISIX.
-It's *fully* customizable.
+On the left panel, you can choose one of the log lines and display the full JSON data.
++
+image::grafana-loki-log-context.png[]
+
+The Grafana skills of the workshop designers are sorely limited.
+Feel free to improve on the existing dashboard.
 
 [TIP]
 .Other noteworthy logging plugins
@@ -1034,8 +1032,88 @@ It's *fully* customizable.
 
 === Traces
 
-== Other plugins
+The third and last pillar of Observability is traces.
+Traces allow you to follow a business request across all components of a distributed system.
+We are going to use https://opentelemetry.io/[OpenTelemetry^] for this.
+OpenTelemetry is the current _de facto_ standard to do observability in general and tracing in particular.
 
+Apache APISIX offers an https://apisix.apache.org/docs/apisix/plugins/opentelemetry/[OpenTelemetry^] plugin.
+
+[WARNING]
+====
+Be aware that the `opentelemetry` plugin only supports the *tracing* part of OpenTelemetry.
+APISIX supports metrics and logs via their specific backends.
+====
+
+The existing infrastructure already offers a Jaeger instance.
+
+[source,yaml]
+.config.yaml
+include::./docker-compose.yml[lines=37..42]
+
+APISIX is pre-configured to use it.
+
+[source,yaml]
+.config.yaml
+include::conf/apisix/config.yaml[lines=34..36]
+
+Central to tracing is the notion of *sampling*.
+In production scenario, you don't want to trace every single request;
+it would be too many data to handle and store.
+
+With the help of the https://apisix.apache.org/docs/apisix/admin-api/#route-api[Admin API^], add the `opentelemetry` plugin with a 50/50 sampling rate to the `Global Rule` with ID `1`.
+
+.See the command
+[%collapsible]
+====
+[source,bash]
+----
+include::{commandsdir}/17_set_otel_global_rule.sh[]
+----
+====
+
+We can test the setup with a couple of requests:
+
+[source,bash]
+----
+for i in {1..10}
+do
+   curl localhost:9080/anything
+done
+----
+
+[NOTE]
+.Help wanted
+====
+The workshop designers are neither Grafana nor Jaeger experts.
+Feel free to open a PR to replace Jaeger UI with a dedicated Grafana dashboard.
+====
+
+Go to the Jaeger UI at <http://localhost:16686/> and select the `APISIX` service.
+Click the btn:[Find Traces] button.
+You should see around 5 traces.
+
+image::jaeger-ui.png[]
+
+This simple example cannot demo the full powers of distributed tracing.
+Here's a screenshot of a single trace across a fully-distributed system comprised of many different components:
+
+image::jaeger-trace-full.png[]
+
+[TIP]
+.Other noteworthy tracing plugins
+====
+* https://apisix.apache.org/docs/apisix/plugins/zipkin/[zipkin^]: Pushes traces to Zipkin logs to https://github.com/openzipkin/zipkin[Zipkin^]
+* https://apisix.apache.org/docs/apisix/plugins/skywalking/[skywalking^]: Pushes traces to https://skywalking.apache.org/[Apache SkyWalking^]
+====
+
+== Advanced use-cases
+
+In this section, we will discover some more advanced use-cases of Apache APISIX.
+
+TODO
+
+////
 === JWT Plugin
 
 Apache APISIX API Gateway acts as a single entry point and offers many authentication plugins, including:
@@ -1260,144 +1338,6 @@ We have validated the client's identity attempting to request by using various h
 [TIP]
 ====
 A https://youtu.be/kbELyQIXAsw[Centralized Authentication with Apache APISIX Plugins^] video tutorial describes different authentication methods, overviews the use-cases and benefits of centralized authentication with Apache APISIX API Gateway and you will learn how to configure common authentication plugins like basic, key, and JWT to protect your services.
-====
-
-=== Zipkin Plugin
-
-The third observability pillar is a tracing or distributed tracing allows you to understand the life of a request as it traverses your service network allows you to answer questions like
-what service has this request touched and how much latency was introduced.
-
-Traces enable you to further explore which logs to look at for a particular session or related set of API calls.
-
-[INFO]
-====
-https://github.com/openzipkin/zipkin[Zipkin^] an open source distributed tracing system. https://apisix.apache.org/docs/apisix/plugins/zipkin[APISIX Zipkin plugin^] is supported to collect tracing and report to Zipkin Collector based on https://zipkin.io/pages/instrumenting.html[Zipkin API specification^].
-====
-
-Here's an example to enable the `zipkin plugin` on the specified route:
-
-[source,bash]
-----
-curl http://127.0.0.1:9080/apisix/admin/routes/1  -X PUT -d '
-{
-    "methods": ["GET"],
-    "uri": "/get",
-    "plugins": {
-        "zipkin": {
-            "endpoint": "http://127.0.0.1:9411/api/v2/spans",
-            "sample_ratio": 1
-        }
-    },
-    "upstream_id": "1"
-}'
-----
-
-Successful response looks like below:
-
-[source,json5]
-----
-{
-  "node": {
-    "key": "/apisix/routes/1",
-    "value": {
-      "upstream_id": "1",
-      "status": 1,
-      "create_time": 1646341656,
-      "uri": "/get",
-      "methods": [
-        "GET"
-      ],
-      "update_time": 1648558131,
-      "id": "1",
-      "plugins": {
-        "zipkin": {
-          "endpoint": "http://127.0.0.1:9411/api/v2/spans",
-          "span_version": 2,
-          "server_addr": "<your-local-ip-address>",
-          "service_name": "APISIX",
-          "sample_ratio": 1
-        }
-      },
-      "priority": 0
-    }
-  },
-  "action": "set"
-}
-----
-
-We can test our example by simple running the following command:
-
-[source,bash]
-----
-curl -i http://127.0.0.1:9080/get
-----
-
-Response:
-[source,json5]
-----
-HTTP/1.1 200 OK
-Content-Type: application/json
-Content-Length: 469
-Connection: keep-alive
-Date: Thu, 31 Mar 2022 10:03:26 GMT
-Access-Control-Allow-Origin: *
-Access-Control-Allow-Credentials: true
-Server: APISIX/2.13.0
-
-{
-  "args": {},
-  "headers": {
-    "Accept": "*/*",
-    "Host": "127.0.0.1",
-    "User-Agent": "curl/7.68.0",
-    "X-Amzn-Trace-Id": "Root=1-62457c6e-0dc0ed5b49ccc6fc7956dc2e",
-    "X-B3-Parentspanid": "61bd3f4046a800e7",
-    "X-B3-Sampled": "1",
-    "X-B3-Spanid": "855cd5465957f414",
-    "X-B3-Traceid": "e18985df47dab632d62083fd96626692",
-    "X-Forwarded-Host": "127.0.0.1"
-  },
-  "origin": "172.19.0.1, 85.253.48.169",
-  "url": "http://127.0.0.1/get"
-}
-----
-
-As you can see, there are some additional trace identifiers (like traceId, spanId, parentId) were appended to the headers:
-
-[source,text]
-----
-    "X-B3-Parentspanid": "61bd3f4046a800e7",
-    "X-B3-Sampled": "1",
-    "X-B3-Spanid": "855cd5465957f414",
-    "X-B3-Traceid": "e18985df47dab632d62083fd96626692",
-----
-
-Then you can use a browser to access http://127.0.0.1:9411/zipkin, see traces on the Web UI of Zipkin
-
-[IMPORTANT]
-====
-You need to run the Zipkin instance in order to install Zipkin Web UI.
-For example, by using docker you can simply run it:
-
-[source,curl]
-----
-docker run -d -p 9411:9411 openzipkin/zipkin
-----
-====
-
-image::zipkin-output-screenshot-1.png[]
-
-image::zipkin-output-screenshot-2.png[]
-
-[INFO]
-====
-You can find information about other Apache APISIX Observability
-Plugins https://apisix.apache.org/docs/apisix/plugins/zipkin[here^].
-====
-
-[TIP]
-====
-A https://youtu.be/XK0xcui5BQU[APIs Observability with Apache APISIX Plugins^] video tutorial presents the power of some observability Plugins and takes a look at how to set up these plugins, how to use them to understand API behavior, and later solve problems that impact our users.
 ====
 
 === Serverless Plugin
@@ -1779,4 +1719,4 @@ We should first familiarize ourselves with a couple of core concepts offeres by 
 * APISIX is build on top of a plugin architecture.
 Every feature (authentication, authorization, etc.) is a https://apisix.apache.org/docs/apisix/architecture-design/plugin/[Plugin^].
 For reference purposes, plugins are grouped into categories: general, transformation, authentication, security, traffic control, observability, serverless, and other protocols.
-
+////
