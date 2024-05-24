@@ -1109,237 +1109,115 @@ image::jaeger-trace-full.png[]
 
 == Advanced use-cases
 
-In this section, we will discover some more advanced use-cases of Apache APISIX.
+The previous section taught the basics of Apache APISIX.
+We're now ready to go further and tackle more advanced features.
+In this section, we will discover a couple of such features.
 
-TODO
+=== JWT authentication
+
+Early in our journey, we link:#_authenticating_client_requests[implemented authentication] via the `key-auth` plugin.
+The plugin is good enough to showcase the concepts, but shouldn't probably be used in real-world authentication scenarios.
+In this context, we should probably use a more robust approach, such at +++<abbr title="JSON Web Token">JWT</abbr>+++.
+
+[quote,'https://www.rfc-editor.org/rfc/rfc7519.html[JSON Web Token (JWT)^]']
+____
+   JSON Web Token (JWT) is a compact, URL-safe means of representing
+   claims to be transferred between two parties.  The claims in a JWT
+   are encoded as a JSON object that is used as the payload of a JSON
+   Web Signature (JWS) structure or as the plaintext of a JSON Web
+   Encryption (JWE) structure, enabling the claims to be digitally
+   signed or integrity protected with a Message Authentication Code
+   (MAC) and/or encrypted.
+____
+
+The https://apisix.apache.org/docs/apisix/plugins/jwt-auth[jwt-auth plugin^] implements the JWT RFC.
+The plugin acts as an issuer and also validates the token on behalf of the API;
+upstream developers do not have to add any code to process the authentication.
+
+Let's apply JWT to our existing API so that only authenticated consumers can access it.
+Just like for the `key-auth` plugin, configuring the `jwt-auth` plugin is a two-step process:
+First, configure the user, then, configure the route.
+
+With the help of the https://apisix.apache.org/docs/apisix/plugins/jwt-auth/[`jwt-auth` plugin documentation^], add the plugin to the exising `johndoe` consumer.
+Keep it simple and only set the required attribute.
+
+.See the command
+[%collapsible]
+====
+[source,bash]
+----
+include::{commandsdir}/18_update_consumer_jwt_credentials.sh[]
+----
+====
+
+We can now add the `jwt-auth` plugin to our exising `Route`.
+
+.See the command
+[%collapsible]
+====
+[source,bash]
+----
+include::{commandsdir}/19_add_jwt_plugin_to_route.sh[]
+----
+====
+
+Compared to the `auth-key`, we need an additional step.
+By default, routes in Apache APISIX forward to upstreams.
+The plugin creates a dedicated route for registered users to request a JWT token, which will be passed in later requests to authenticate.
+We must expose this route to users;
+we can achieve this with the https://apisix.apache.org/docs/apisix/plugins/public-api/[`public-api` plugin^].
+
+.See the command
+[%collapsible]
+====
+[source,bash]
+----
+include::{commandsdir}/20_jwt_plugin_enable_public-api-plugin.sh[]
+----
+====
+
+It's time to validate our setup.
+We should request a JWT token from the dedicated route.
+For ease of use, we store it in an environment variable for later usage:
+
+[source,bash]
+----
+export TOKEN=`curl http://localhost:9080/apisix/plugin/jwt/sign\?key=mykey` <1><2>
+----
+
+<1> The `9080` port is the user-facing one
+<2> We created the key `mykey` earlier and it's bound to the user `johndoe`
+
+Then, we can use it to authenticate the request:
+
+[source,bash]
+----
+curl -i -X GET http://localhost:9080/anything -H "Authorization: $TOKEN"
+----
+
+At this point, we have validated the client's identity with JWT.
+try with no token or a wrong token and see what happens.
+
+[source,bash]
+----
+curl -i -X GET http://localhost:9080/anything
+curl -i -X GET http://localhost:9080/anything -H "Authorization: foobar"
+----
+
+*Go further:*
+
+* https://docs.api7.ai/hub/jwt-auth[jwt-auth^]
+* https://www.youtube.com/watch?v=kbELyQIXAsw[Centralized Authentication with Apache APISIX Plugins^]
+
+[TIP]
+.Other noteworthy authentication plugins
+====
+* https://apisix.apache.org/docs/apisix/plugins/openid-connect[openid-connect^]: Delegates authentication to https://openid.net/[OpenID Connect^]
+* https://apisix.apache.org/docs/apisix/plugins/ldap-auth[ldap-auth^]: Delegates authentication to an https://en.wikipedia.org/wiki/Lightweight_Directory_Access_Protocol[LDAP^] directory
+* https://apisix.apache.org/docs/apisix/plugins/authz-keycloak[authz-keycloak^]: Delegates authentication to a https://www.keycloak.org/[Keycloak^] server
+====
 
 ////
-=== JWT Plugin
-
-Apache APISIX API Gateway acts as a single entry point and offers many authentication plugins, including:
-
-* https://apisix.apache.org/docs/apisix/plugins/basic-auth[HTTP Basic Auth^]
-* https://apisix.apache.org/docs/apisix/plugins/key-auth[API Keys based Auth^]
-* https://apisix.apache.org/docs/apisix/plugins/openid-connect[OpenID Connect^]
-* https://apisix.apache.org/docs/apisix/plugins/hmac-auth[HMAC Auth^]
-* https://apisix.apache.org/docs/apisix/plugins/ldap-auth[Ldap Authentication^]
-* etc.
-
-The https://apisix.apache.org/docs/apisix/plugins/jwt-auth[JWT (JSON Web Token) plugin^] is another solid option for API gateway authentication.
-JWT simplifies authentication setup, taking care of the nitty-gritty details.
-Please refer to https://jwt.io/[JWT^] for more information.
-
-[INFO]
-====
-The https://apisix.apache.org/docs/apisix/plugins/jwt-auth[Apache APISIX JWT Plugin] acts as an issuer and also validates the token on behalf of the API.
-It means that developers do not have to add any code to process the authentication.
-====
-
-[IMPORTANT]
-====
-We need to disable the `key-auth` plugin we previously enabled to use another authentication plugin.
-Disabling is possible via the Dashboard or the CLI.
-
-image::disable-key-auth-plugin.png[]
-====
-
-Let's apply the JWT plugin to our existing API.
-We update the existing `Consumer` plugin config with JWT-related configuration:
-
-.See the command
-[%collapsible]
-====
-[source,bash]
-----
-include::{commandsdir}/8_update_consumer_jwt_credentials.sh[]
-----
-====
-
-The response will look something like this:
-
-[source,json5]
-----
-{
-  "node": {
-    "key": "/apisix/consumers/example_consumer",
-    "value": {
-      "create_time": 1649158467,
-      "username": "example_consumer",
-      "update_time": 1649163154,
-      "plugins": {
-        "jwt-auth": {
-          "base64_secret": false,
-          "secret": "my-secret-key",
-          "algorithm": "HS256",
-          "key": "user-key",
-          "exp": 86400
-        }
-      }
-    }
-  },
-  "action": "set"
-}
-----
-
-We can now add the `jwt-auth` plugin to the Route we have created previously:
-
-.See the command
-[%collapsible]
-====
-[source,bash]
-----
-include::{commandsdir}/8_add_jwt_plugin_to_route.sh[]
-----
-====
-
-Response:
-
-[source,json5]
-----
-{
-  "node": {
-    "key": "/apisix/routes/1",
-    "value": {
-      "upstream_id": "1",
-      "uri": "/get",
-      "create_time": 1648567195,
-      "status": 1,
-      "id": "1",
-      "plugins": {
-        "jwt-auth": {}
-      },
-      "priority": 0,
-      "methods": [
-        "GET"
-      ],
-      "update_time": 1649163340
-    }
-  },
-  "action": "set"
-}
-
-----
-
-==== Test Plugin
-
-We want to validate that the setup is correct as we did before.
-
-[TIP]
-====
-`jwt-auth` uses the HS256 algorithm by default.
-If you use the RS256 algorithm, you must specify the algorithm and configure the public and private keys.
-Please check the https://apisix.apache.org/docs/apisix/plugins/jwt-auth#:~:text=jwt%2Dauth%20uses%20the%20HS256%20algorithm[documentation^] for more details.
-====
-
-First, you need to set up the route for the API that signs the token, which will use the https://apisix.apache.org/docs/apisix/plugins/public-api/[public-api^] plugin.
-
-.See the command
-[%collapsible]
-====
-[source,bash]
-----
-include::{commandsdir}/8_jwt_plugin_enable_public-api-plugin.sh[]
-----
-====
-
-Response:
-
-[source,json5]
-----
-{
-  "action": "set",
-  "node": {
-    "key": "/apisix/routes/jas",
-    "value": {
-      "status": 1,
-      "priority": 0,
-      "id": "jas",
-      "update_time": 1649490287,
-      "plugins": {
-        "public-api": {}
-      },
-      "uri": "/apisix/plugin/jwt/sign",
-      "create_time": 1649490287
-    }
-  }
-}
-----
-
-Then, run the following command to generate a new JWT token:
-
-.See the command
-[%collapsible]
-====
-[source,bash]
-----
-include::{commandsdir}/8_jwt_plugin_generate_token.sh[]
-----
-====
-
-Apache APISIX returns a token:
-
-[source,text]
-----
-HTTP/1.1 200 OK
-Date: Tue, 05 Apr 2022 12:57:34 GMT
-Content-Type: text/plain; charset=utf-8
-Transfer-Encoding: chunked
-Connection: keep-alive
-Server: APISIX/2.12.1
-
-<GENERATED_TOKEN>
-----
-
-We can use the newly-generated token to authenticate our next request:
-
-.See the command
-[%collapsible]
-====
-[source,bash]
-----
-include::{commandsdir}/8_jwt_plugin_in_use.sh[]
-----
-====
-
-Output with token:
-
-[source,text]
-----
-HTTP/1.1 200 OK
-Content-Type: application/json
-Content-Length: 454
-Connection: keep-alive
-Date: Tue, 05 Apr 2022 13:02:30 GMT
-Access-Control-Allow-Origin: *
-Access-Control-Allow-Credentials: true
-Server: APISIX/2.12.1
-----
-
-If you try to access the same endpoint without a token in the Header request, you will get HTTP Error _401 Unauthorized:
-
-.See the command
-[%collapsible]
-====
-[source,bash]
-----
-include::{commandsdir}/8_jwt_plugin_failure_example.sh[]
-----
-====
-
-Output without token:
-
-[source,json5]
-----
-{ "message": "Missing JWT token in request" }
-----
-
-We have validated the client's identity attempting to request by using various https://apisix.apache.org/docs/apisix/plugins/key-auth[authentication plugins] with the help of Apache APISIX.
-
-[TIP]
-====
-A https://youtu.be/kbELyQIXAsw[Centralized Authentication with Apache APISIX Plugins^] video tutorial describes different authentication methods, overviews the use-cases and benefits of centralized authentication with Apache APISIX API Gateway and you will learn how to configure common authentication plugins like basic, key, and JWT to protect your services.
-====
-
 === Serverless Plugin
 
 Serverless is a cloud-native development model that allows developers to build and run applications without having to manage servers. It provides all the continually updated infrastructure and resources needed to run your applications.

@@ -1,4 +1,4 @@
-curl http://127.0.0.1:9080/apisix/admin/routes/jas -X PUT -d '
+curl http://localhost:9180/apisix/admin/routes -X POST -d '
 {
     "uri": "/apisix/plugin/jwt/sign",
     "plugins": {
