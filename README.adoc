@@ -937,11 +937,13 @@ A Grafana instance is already running on the infrastructure.
 Go to `http://localhost:3000/` to access Grafana.
 On the lower right panel, choose the Apache APISIX dashboard.
 
-image::grafana-dashboard-apisix.webp[]
+.Choose the Apache APISIX dashboard
+image::grafana-dashboard-apisix.webp[Choose the Apache APISIX dashboard]
 
 The APISIX dashboard should show up:
 
-image::grafana-dashboard-for-apisix.png[]
+.Grafana dashboard for Apache APISIX
+image::grafana-dashboard-for-apisix.png[Grafana dashboard for Apache APISIX]
 
 It's the default Apache APISIX Grafana dashboard.
 Grafana users are actively encouraged to customize it to cater to their specific needs.
@@ -1008,15 +1010,18 @@ Grafana is already configured with the Loki datasource.
 . Go to `http://localhost:3000/`
 . In the list of available dashboards, choose Loki
 +
-image::grafana-dashboard-loki.webp[]
+.Choose the Loki dashboard
+image::grafana-dashboard-loki.webp[Choose the Loki dashboard]
 +
 . The already-configured Loki dashboard shows up:
 +
-image::grafana-dashboard-for-loki.png[]
+.Grafana dashboard for Loki
+image::grafana-dashboard-for-loki.png[Grafana dashboard for Loki]
 +
 On the left panel, you can choose one of the log lines and display the full JSON data.
 +
-image::grafana-loki-log-context.png[]
+.Sample log context
+image::grafana-loki-log-context.png[Sample log context]
 
 The Grafana skills of the workshop designers are sorely limited.
 Feel free to improve on the existing dashboard.
@@ -1032,6 +1037,9 @@ Feel free to improve on the existing dashboard.
 
 === Traces
 
+[.right]
+image:OpenTelemetry.svg[OpenTelemetry logo, 200, 200]
+
 The third and last pillar of Observability is traces.
 Traces allow you to follow a business request across all components of a distributed system.
 We are going to use https://opentelemetry.io/[OpenTelemetry^] for this.
@@ -1044,6 +1052,9 @@ Apache APISIX offers an https://apisix.apache.org/docs/apisix/plugins/openteleme
 Be aware that the `opentelemetry` plugin only supports the *tracing* part of OpenTelemetry.
 APISIX supports metrics and logs via their specific backends.
 ====
+
+[.right]
+image:jaeger-logo.svg[Jaeger logo, 300, 300]
 
 The existing infrastructure already offers a Jaeger instance.
 
@@ -1093,12 +1104,14 @@ Go to the Jaeger UI at <http://localhost:16686/> and select the `APISIX` service
 Click the btn:[Find Traces] button.
 You should see around 5 traces.
 
-image::jaeger-ui.png[]
+.Jager UI showing Apache APISIX traces
+image::jaeger-ui.png[Jager UI showing Apache APISIX traces]
 
 This simple example cannot demo the full powers of distributed tracing.
 Here's a screenshot of a single trace across a fully-distributed system comprised of many different components:
 
-image::jaeger-trace-full.png[]
+.Jaeger UI showing a single trace across a fully-distributed system
+image::jaeger-trace-full.png[Jaeger UI showing a single trace across a fully-distributed system]
 
 [TIP]
 .Other noteworthy tracing plugins
@@ -1129,6 +1142,9 @@ ____
    signed or integrity protected with a Message Authentication Code
    (MAC) and/or encrypted.
 ____
+
+[.right]
+image:jwt-logo.svg[JWT logo, 200, 200]
 
 The https://apisix.apache.org/docs/apisix/plugins/jwt-auth[jwt-auth plugin^] implements the JWT RFC.
 The plugin acts as an issuer and also validates the token on behalf of the API;
