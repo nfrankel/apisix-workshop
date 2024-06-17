@@ -1,0 +1,2604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.16">
+<meta name="author" content="Nicolas Fränkel">
+<title>Apache APISIX Hands-on Lab</title>
+<style>
+/*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
+/* Uncomment the following line when using as a custom stylesheet */
+@import "https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700";
+html{font-family:sans-serif;-webkit-text-size-adjust:100%}
+a{background:none}
+a:focus{outline:thin dotted}
+a:active,a:hover{outline:0}
+h1{font-size:2em;margin:.67em 0}
+b,strong{font-weight:bold}
+abbr{font-size:.9em}
+abbr[title]{cursor:help;border-bottom:1px dotted #dddddf;text-decoration:none}
+dfn{font-style:italic}
+hr{height:0}
+mark{background:#ff0;color:#000}
+code,kbd,pre,samp{font-family:monospace;font-size:1em}
+pre{white-space:pre-wrap}
+q{quotes:"\201C" "\201D" "\2018" "\2019"}
+small{font-size:80%}
+sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}
+sup{top:-.5em}
+sub{bottom:-.25em}
+img{border:0}
+svg:not(:root){overflow:hidden}
+figure{margin:0}
+audio,video{display:inline-block}
+audio:not([controls]){display:none;height:0}
+fieldset{border:1px solid silver;margin:0 2px;padding:.35em .625em .75em}
+legend{border:0;padding:0}
+button,input,select,textarea{font-family:inherit;font-size:100%;margin:0}
+button,input{line-height:normal}
+button,select{text-transform:none}
+button,html input[type=button],input[type=reset],input[type=submit]{-webkit-appearance:button;cursor:pointer}
+button[disabled],html input[disabled]{cursor:default}
+input[type=checkbox],input[type=radio]{padding:0}
+button::-moz-focus-inner,input::-moz-focus-inner{border:0;padding:0}
+textarea{overflow:auto;vertical-align:top}
+table{border-collapse:collapse;border-spacing:0}
+*,::before,::after{box-sizing:border-box}
+html,body{font-size:100%}
+body{background:#fff;color:rgba(0,0,0,.8);padding:0;margin:0;font-family:"Noto Serif","DejaVu Serif",serif;line-height:1;position:relative;cursor:auto;-moz-tab-size:4;-o-tab-size:4;tab-size:4;word-wrap:anywhere;-moz-osx-font-smoothing:grayscale;-webkit-font-smoothing:antialiased}
+a:hover{cursor:pointer}
+img,object,embed{max-width:100%;height:auto}
+object,embed{height:100%}
+img{-ms-interpolation-mode:bicubic}
+.left{float:left!important}
+.right{float:right!important}
+.text-left{text-align:left!important}
+.text-right{text-align:right!important}
+.text-center{text-align:center!important}
+.text-justify{text-align:justify!important}
+.hide{display:none}
+img,object,svg{display:inline-block;vertical-align:middle}
+textarea{height:auto;min-height:50px}
+select{width:100%}
+.subheader,.admonitionblock td.content>.title,.audioblock>.title,.exampleblock>.title,.imageblock>.title,.listingblock>.title,.literalblock>.title,.stemblock>.title,.openblock>.title,.paragraph>.title,.quoteblock>.title,table.tableblock>.title,.verseblock>.title,.videoblock>.title,.dlist>.title,.olist>.title,.ulist>.title,.qlist>.title,.hdlist>.title{line-height:1.45;color:#7a2518;font-weight:400;margin-top:0;margin-bottom:.25em}
+div,dl,dt,dd,ul,ol,li,h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6,pre,form,p,blockquote,th,td{margin:0;padding:0}
+a{color:#2156a5;text-decoration:underline;line-height:inherit}
+a:hover,a:focus{color:#1d4b8f}
+a img{border:0}
+p{line-height:1.6;margin-bottom:1.25em;text-rendering:optimizeLegibility}
+p aside{font-size:.875em;line-height:1.35;font-style:italic}
+h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{font-family:"Open Sans","DejaVu Sans",sans-serif;font-weight:300;font-style:normal;color:#ba3925;text-rendering:optimizeLegibility;margin-top:1em;margin-bottom:.5em;line-height:1.0125em}
+h1 small,h2 small,h3 small,#toctitle small,.sidebarblock>.content>.title small,h4 small,h5 small,h6 small{font-size:60%;color:#e99b8f;line-height:0}
+h1{font-size:2.125em}
+h2{font-size:1.6875em}
+h3,#toctitle,.sidebarblock>.content>.title{font-size:1.375em}
+h4,h5{font-size:1.125em}
+h6{font-size:1em}
+hr{border:solid #dddddf;border-width:1px 0 0;clear:both;margin:1.25em 0 1.1875em}
+em,i{font-style:italic;line-height:inherit}
+strong,b{font-weight:bold;line-height:inherit}
+small{font-size:60%;line-height:inherit}
+code{font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;font-weight:400;color:rgba(0,0,0,.9)}
+ul,ol,dl{line-height:1.6;margin-bottom:1.25em;list-style-position:outside;font-family:inherit}
+ul,ol{margin-left:1.5em}
+ul li ul,ul li ol{margin-left:1.25em;margin-bottom:0}
+ul.square li ul,ul.circle li ul,ul.disc li ul{list-style:inherit}
+ul.square{list-style-type:square}
+ul.circle{list-style-type:circle}
+ul.disc{list-style-type:disc}
+ol li ul,ol li ol{margin-left:1.25em;margin-bottom:0}
+dl dt{margin-bottom:.3125em;font-weight:bold}
+dl dd{margin-bottom:1.25em}
+blockquote{margin:0 0 1.25em;padding:.5625em 1.25em 0 1.1875em;border-left:1px solid #ddd}
+blockquote,blockquote p{line-height:1.6;color:rgba(0,0,0,.85)}
+@media screen and (min-width:768px){h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{line-height:1.2}
+    h1{font-size:2.75em}
+    h2{font-size:2.3125em}
+    h3,#toctitle,.sidebarblock>.content>.title{font-size:1.6875em}
+    h4{font-size:1.4375em}}
+table{background:#fff;margin-bottom:1.25em;border:1px solid #dedede;word-wrap:normal}
+table thead,table tfoot{background:#f7f8f7}
+table thead tr th,table thead tr td,table tfoot tr th,table tfoot tr td{padding:.5em .625em .625em;font-size:inherit;color:rgba(0,0,0,.8);text-align:left}
+table tr th,table tr td{padding:.5625em .625em;font-size:inherit;color:rgba(0,0,0,.8)}
+table tr.even,table tr.alt{background:#f8f8f7}
+table thead tr th,table tfoot tr th,table tbody tr td,table tr td,table tfoot tr td{line-height:1.6}
+h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{line-height:1.2;word-spacing:-.05em}
+h1 strong,h2 strong,h3 strong,#toctitle strong,.sidebarblock>.content>.title strong,h4 strong,h5 strong,h6 strong{font-weight:400}
+.center{margin-left:auto;margin-right:auto}
+.stretch{width:100%}
+.clearfix::before,.clearfix::after,.float-group::before,.float-group::after{content:" ";display:table}
+.clearfix::after,.float-group::after{clear:both}
+:not(pre).nobreak{word-wrap:normal}
+:not(pre).nowrap{white-space:nowrap}
+:not(pre).pre-wrap{white-space:pre-wrap}
+:not(pre):not([class^=L])>code{font-size:.9375em;font-style:normal!important;letter-spacing:0;padding:.1em .5ex;word-spacing:-.15em;background:#f7f7f8;border-radius:4px;line-height:1.45;text-rendering:optimizeSpeed}
+pre{color:rgba(0,0,0,.9);font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;line-height:1.45;text-rendering:optimizeSpeed}
+pre code,pre pre{color:inherit;font-size:inherit;line-height:inherit}
+pre>code{display:block}
+pre.nowrap,pre.nowrap pre{white-space:pre;word-wrap:normal}
+em em{font-style:normal}
+strong strong{font-weight:400}
+.keyseq{color:rgba(51,51,51,.8)}
+kbd{font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;display:inline-block;color:rgba(0,0,0,.8);font-size:.65em;line-height:1.45;background:#f7f7f7;border:1px solid #ccc;border-radius:3px;box-shadow:0 1px 0 rgba(0,0,0,.2),inset 0 0 0 .1em #fff;margin:0 .15em;padding:.2em .5em;vertical-align:middle;position:relative;top:-.1em;white-space:nowrap}
+.keyseq kbd:first-child{margin-left:0}
+.keyseq kbd:last-child{margin-right:0}
+.menuseq,.menuref{color:#000}
+.menuseq b:not(.caret),.menuref{font-weight:inherit}
+.menuseq{word-spacing:-.02em}
+.menuseq b.caret{font-size:1.25em;line-height:.8}
+.menuseq i.caret{font-weight:bold;text-align:center;width:.45em}
+b.button::before,b.button::after{position:relative;top:-1px;font-weight:400}
+b.button::before{content:"[";padding:0 3px 0 2px}
+b.button::after{content:"]";padding:0 2px 0 3px}
+p a>code:hover{color:rgba(0,0,0,.9)}
+#header,#content,#footnotes,#footer{width:100%;margin:0 auto;max-width:62.5em;*zoom:1;position:relative;padding-left:.9375em;padding-right:.9375em}
+#header::before,#header::after,#content::before,#content::after,#footnotes::before,#footnotes::after,#footer::before,#footer::after{content:" ";display:table}
+#header::after,#content::after,#footnotes::after,#footer::after{clear:both}
+#content{margin-top:1.25em}
+#content::before{content:none}
+#header>h1:first-child{color:rgba(0,0,0,.85);margin-top:2.25rem;margin-bottom:0}
+#header>h1:first-child+#toc{margin-top:8px;border-top:1px solid #dddddf}
+#header>h1:only-child,body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
+#header .details{border-bottom:1px solid #dddddf;line-height:1.45;padding-top:.25em;padding-bottom:.25em;padding-left:.25em;color:rgba(0,0,0,.6);display:flex;flex-flow:row wrap}
+#header .details span:first-child{margin-left:-.125em}
+#header .details span.email a{color:rgba(0,0,0,.85)}
+#header .details br{display:none}
+#header .details br+span::before{content:"\00a0\2013\00a0"}
+#header .details br+span.author::before{content:"\00a0\22c5\00a0";color:rgba(0,0,0,.85)}
+#header .details br+span#revremark::before{content:"\00a0|\00a0"}
+#header #revnumber{text-transform:capitalize}
+#header #revnumber::after{content:"\00a0"}
+#content>h1:first-child:not([class]){color:rgba(0,0,0,.85);border-bottom:1px solid #dddddf;padding-bottom:8px;margin-top:0;padding-top:1rem;margin-bottom:1.25rem}
+#toc{border-bottom:1px solid #e7e7e9;padding-bottom:.5em}
+#toc>ul{margin-left:.125em}
+#toc ul.sectlevel0>li>a{font-style:italic}
+#toc ul.sectlevel0 ul.sectlevel1{margin:.5em 0}
+#toc ul{font-family:"Open Sans","DejaVu Sans",sans-serif;list-style-type:none}
+#toc li{line-height:1.3334;margin-top:.3334em}
+#toc a{text-decoration:none}
+#toc a:active{text-decoration:underline}
+#toctitle{color:#7a2518;font-size:1.2em}
+@media screen and (min-width:768px){#toctitle{font-size:1.375em}
+    body.toc2{padding-left:15em;padding-right:0}
+    #toc.toc2{margin-top:0!important;background:#f8f8f7;position:fixed;width:15em;left:0;top:0;border-right:1px solid #e7e7e9;border-top-width:0!important;border-bottom-width:0!important;z-index:1000;padding:1.25em 1em;height:100%;overflow:auto}
+    #toc.toc2 #toctitle{margin-top:0;margin-bottom:.8rem;font-size:1.2em}
+    #toc.toc2>ul{font-size:.9em;margin-bottom:0}
+    #toc.toc2 ul ul{margin-left:0;padding-left:1em}
+    #toc.toc2 ul.sectlevel0 ul.sectlevel1{padding-left:0;margin-top:.5em;margin-bottom:.5em}
+    body.toc2.toc-right{padding-left:0;padding-right:15em}
+    body.toc2.toc-right #toc.toc2{border-right-width:0;border-left:1px solid #e7e7e9;left:auto;right:0}}
+@media screen and (min-width:1280px){body.toc2{padding-left:20em;padding-right:0}
+    #toc.toc2{width:20em}
+    #toc.toc2 #toctitle{font-size:1.375em}
+    #toc.toc2>ul{font-size:.95em}
+    #toc.toc2 ul ul{padding-left:1.25em}
+    body.toc2.toc-right{padding-left:0;padding-right:20em}}
+#content #toc{border:1px solid #e0e0dc;margin-bottom:1.25em;padding:1.25em;background:#f8f8f7;border-radius:4px}
+#content #toc>:first-child{margin-top:0}
+#content #toc>:last-child{margin-bottom:0}
+#footer{max-width:none;background:rgba(0,0,0,.8);padding:1.25em}
+#footer-text{color:hsla(0,0%,100%,.8);line-height:1.44}
+#content{margin-bottom:.625em}
+.sect1{padding-bottom:.625em}
+@media screen and (min-width:768px){#content{margin-bottom:1.25em}
+    .sect1{padding-bottom:1.25em}}
+.sect1:last-child{padding-bottom:0}
+.sect1+.sect1{border-top:1px solid #e7e7e9}
+#content h1>a.anchor,h2>a.anchor,h3>a.anchor,#toctitle>a.anchor,.sidebarblock>.content>.title>a.anchor,h4>a.anchor,h5>a.anchor,h6>a.anchor{position:absolute;z-index:1001;width:1.5ex;margin-left:-1.5ex;display:block;text-decoration:none!important;visibility:hidden;text-align:center;font-weight:400}
+#content h1>a.anchor::before,h2>a.anchor::before,h3>a.anchor::before,#toctitle>a.anchor::before,.sidebarblock>.content>.title>a.anchor::before,h4>a.anchor::before,h5>a.anchor::before,h6>a.anchor::before{content:"\00A7";font-size:.85em;display:block;padding-top:.1em}
+#content h1:hover>a.anchor,#content h1>a.anchor:hover,h2:hover>a.anchor,h2>a.anchor:hover,h3:hover>a.anchor,#toctitle:hover>a.anchor,.sidebarblock>.content>.title:hover>a.anchor,h3>a.anchor:hover,#toctitle>a.anchor:hover,.sidebarblock>.content>.title>a.anchor:hover,h4:hover>a.anchor,h4>a.anchor:hover,h5:hover>a.anchor,h5>a.anchor:hover,h6:hover>a.anchor,h6>a.anchor:hover{visibility:visible}
+#content h1>a.link,h2>a.link,h3>a.link,#toctitle>a.link,.sidebarblock>.content>.title>a.link,h4>a.link,h5>a.link,h6>a.link{color:#ba3925;text-decoration:none}
+#content h1>a.link:hover,h2>a.link:hover,h3>a.link:hover,#toctitle>a.link:hover,.sidebarblock>.content>.title>a.link:hover,h4>a.link:hover,h5>a.link:hover,h6>a.link:hover{color:#a53221}
+details,.audioblock,.imageblock,.literalblock,.listingblock,.stemblock,.videoblock{margin-bottom:1.25em}
+details{margin-left:1.25rem}
+details>summary{cursor:pointer;display:block;position:relative;line-height:1.6;margin-bottom:.625rem;-webkit-tap-highlight-color:transparent}
+details>summary::before{content:"";border:solid transparent;border-left:solid;border-width:.3em 0 .3em .5em;position:absolute;top:.5em;left:-1.25rem;transform:translateX(15%)}
+details[open]>summary::before{border:solid transparent;border-top:solid;border-width:.5em .3em 0;transform:translateY(15%)}
+details>summary::after{content:"";width:1.25rem;height:1em;position:absolute;top:.3em;left:-1.25rem}
+.admonitionblock td.content>.title,.audioblock>.title,.exampleblock>.title,.imageblock>.title,.listingblock>.title,.literalblock>.title,.stemblock>.title,.openblock>.title,.paragraph>.title,.quoteblock>.title,table.tableblock>.title,.verseblock>.title,.videoblock>.title,.dlist>.title,.olist>.title,.ulist>.title,.qlist>.title,.hdlist>.title{text-rendering:optimizeLegibility;text-align:left;font-family:"Noto Serif","DejaVu Serif",serif;font-size:1rem;font-style:italic}
+table.tableblock.fit-content>caption.title{white-space:nowrap;width:0}
+.paragraph.lead>p,#preamble>.sectionbody>[class=paragraph]:first-of-type p{font-size:1.21875em;line-height:1.6;color:rgba(0,0,0,.85)}
+.admonitionblock>table{border-collapse:separate;border:0;background:none;width:100%}
+.admonitionblock>table td.icon{text-align:center;width:80px}
+.admonitionblock>table td.icon img{max-width:none}
+.admonitionblock>table td.icon .title{font-weight:bold;font-family:"Open Sans","DejaVu Sans",sans-serif;text-transform:uppercase}
+.admonitionblock>table td.content{padding-left:1.125em;padding-right:1.25em;border-left:1px solid #dddddf;color:rgba(0,0,0,.6);word-wrap:anywhere}
+.admonitionblock>table td.content>:last-child>:last-child{margin-bottom:0}
+.exampleblock>.content{border:1px solid #e6e6e6;margin-bottom:1.25em;padding:1.25em;background:#fff;border-radius:4px}
+.exampleblock>.content>:first-child{margin-top:0}
+.exampleblock>.content>:last-child{margin-bottom:0}
+.sidebarblock{border:1px solid #dbdbd6;margin-bottom:1.25em;padding:1.25em;background:#f3f3f2;border-radius:4px}
+.sidebarblock>:first-child{margin-top:0}
+.sidebarblock>:last-child{margin-bottom:0}
+.sidebarblock>.content>.title{color:#7a2518;margin-top:0;text-align:center}
+.exampleblock>.content>:last-child>:last-child,.exampleblock>.content .olist>ol>li:last-child>:last-child,.exampleblock>.content .ulist>ul>li:last-child>:last-child,.exampleblock>.content .qlist>ol>li:last-child>:last-child,.sidebarblock>.content>:last-child>:last-child,.sidebarblock>.content .olist>ol>li:last-child>:last-child,.sidebarblock>.content .ulist>ul>li:last-child>:last-child,.sidebarblock>.content .qlist>ol>li:last-child>:last-child{margin-bottom:0}
+.literalblock pre,.listingblock>.content>pre{border-radius:4px;overflow-x:auto;padding:1em;font-size:.8125em}
+@media screen and (min-width:768px){.literalblock pre,.listingblock>.content>pre{font-size:.90625em}}
+@media screen and (min-width:1280px){.literalblock pre,.listingblock>.content>pre{font-size:1em}}
+.literalblock pre,.listingblock>.content>pre:not(.highlight),.listingblock>.content>pre[class=highlight],.listingblock>.content>pre[class^="highlight "]{background:#f7f7f8}
+.literalblock.output pre{color:#f7f7f8;background:rgba(0,0,0,.9)}
+.listingblock>.content{position:relative}
+.listingblock code[data-lang]::before{display:none;content:attr(data-lang);position:absolute;font-size:.75em;top:.425rem;right:.5rem;line-height:1;text-transform:uppercase;color:inherit;opacity:.5}
+.listingblock:hover code[data-lang]::before{display:block}
+.listingblock.terminal pre .command::before{content:attr(data-prompt);padding-right:.5em;color:inherit;opacity:.5}
+.listingblock.terminal pre .command:not([data-prompt])::before{content:"$"}
+.listingblock pre.highlightjs{padding:0}
+.listingblock pre.highlightjs>code{padding:1em;border-radius:4px}
+.listingblock pre.prettyprint{border-width:0}
+.prettyprint{background:#f7f7f8}
+pre.prettyprint .linenums{line-height:1.45;margin-left:2em}
+pre.prettyprint li{background:none;list-style-type:inherit;padding-left:0}
+pre.prettyprint li code[data-lang]::before{opacity:1}
+pre.prettyprint li:not(:first-child) code[data-lang]::before{display:none}
+table.linenotable{border-collapse:separate;border:0;margin-bottom:0;background:none}
+table.linenotable td[class]{color:inherit;vertical-align:top;padding:0;line-height:inherit;white-space:normal}
+table.linenotable td.code{padding-left:.75em}
+table.linenotable td.linenos{border-right:1px solid;opacity:.35;padding-right:.5em}
+pre.pygments .lineno{border-right:1px solid;opacity:.35;display:inline-block;margin-right:.75em}
+pre.pygments .lineno::before{content:"";margin-right:-.125em}
+.quoteblock{margin:0 1em 1.25em 1.5em;display:table}
+.quoteblock:not(.excerpt)>.title{margin-left:-1.5em;margin-bottom:.75em}
+.quoteblock blockquote,.quoteblock p{color:rgba(0,0,0,.85);font-size:1.15rem;line-height:1.75;word-spacing:.1em;letter-spacing:0;font-style:italic;text-align:justify}
+.quoteblock blockquote{margin:0;padding:0;border:0}
+.quoteblock blockquote::before{content:"\201c";float:left;font-size:2.75em;font-weight:bold;line-height:.6em;margin-left:-.6em;color:#7a2518;text-shadow:0 1px 2px rgba(0,0,0,.1)}
+.quoteblock blockquote>.paragraph:last-child p{margin-bottom:0}
+.quoteblock .attribution{margin-top:.75em;margin-right:.5ex;text-align:right}
+.verseblock{margin:0 1em 1.25em}
+.verseblock pre{font-family:"Open Sans","DejaVu Sans",sans-serif;font-size:1.15rem;color:rgba(0,0,0,.85);font-weight:300;text-rendering:optimizeLegibility}
+.verseblock pre strong{font-weight:400}
+.verseblock .attribution{margin-top:1.25rem;margin-left:.5ex}
+.quoteblock .attribution,.verseblock .attribution{font-size:.9375em;line-height:1.45;font-style:italic}
+.quoteblock .attribution br,.verseblock .attribution br{display:none}
+.quoteblock .attribution cite,.verseblock .attribution cite{display:block;letter-spacing:-.025em;color:rgba(0,0,0,.6)}
+.quoteblock.abstract blockquote::before,.quoteblock.excerpt blockquote::before,.quoteblock .quoteblock blockquote::before{display:none}
+.quoteblock.abstract blockquote,.quoteblock.abstract p,.quoteblock.excerpt blockquote,.quoteblock.excerpt p,.quoteblock .quoteblock blockquote,.quoteblock .quoteblock p{line-height:1.6;word-spacing:0}
+.quoteblock.abstract{margin:0 1em 1.25em;display:block}
+.quoteblock.abstract>.title{margin:0 0 .375em;font-size:1.15em;text-align:center}
+.quoteblock.excerpt>blockquote,.quoteblock .quoteblock{padding:0 0 .25em 1em;border-left:.25em solid #dddddf}
+.quoteblock.excerpt,.quoteblock .quoteblock{margin-left:0}
+.quoteblock.excerpt blockquote,.quoteblock.excerpt p,.quoteblock .quoteblock blockquote,.quoteblock .quoteblock p{color:inherit;font-size:1.0625rem}
+.quoteblock.excerpt .attribution,.quoteblock .quoteblock .attribution{color:inherit;font-size:.85rem;text-align:left;margin-right:0}
+p.tableblock:last-child{margin-bottom:0}
+td.tableblock>.content{margin-bottom:1.25em;word-wrap:anywhere}
+td.tableblock>.content>:last-child{margin-bottom:-1.25em}
+table.tableblock,th.tableblock,td.tableblock{border:0 solid #dedede}
+table.grid-all>*>tr>*{border-width:1px}
+table.grid-cols>*>tr>*{border-width:0 1px}
+table.grid-rows>*>tr>*{border-width:1px 0}
+table.frame-all{border-width:1px}
+table.frame-ends{border-width:1px 0}
+table.frame-sides{border-width:0 1px}
+table.frame-none>colgroup+*>:first-child>*,table.frame-sides>colgroup+*>:first-child>*{border-top-width:0}
+table.frame-none>:last-child>:last-child>*,table.frame-sides>:last-child>:last-child>*{border-bottom-width:0}
+table.frame-none>*>tr>:first-child,table.frame-ends>*>tr>:first-child{border-left-width:0}
+table.frame-none>*>tr>:last-child,table.frame-ends>*>tr>:last-child{border-right-width:0}
+table.stripes-all tr,table.stripes-odd tr:nth-of-type(odd),table.stripes-even tr:nth-of-type(even),table.stripes-hover tr:hover{background:#f8f8f7}
+th.halign-left,td.halign-left{text-align:left}
+th.halign-right,td.halign-right{text-align:right}
+th.halign-center,td.halign-center{text-align:center}
+th.valign-top,td.valign-top{vertical-align:top}
+th.valign-bottom,td.valign-bottom{vertical-align:bottom}
+th.valign-middle,td.valign-middle{vertical-align:middle}
+table thead th,table tfoot th{font-weight:bold}
+tbody tr th{background:#f7f8f7}
+tbody tr th,tbody tr th p,tfoot tr th,tfoot tr th p{color:rgba(0,0,0,.8);font-weight:bold}
+p.tableblock>code:only-child{background:none;padding:0}
+p.tableblock{font-size:1em}
+ol{margin-left:1.75em}
+ul li ol{margin-left:1.5em}
+dl dd{margin-left:1.125em}
+dl dd:last-child,dl dd:last-child>:last-child{margin-bottom:0}
+ol>li p,ul>li p,ul dd,ol dd,.olist .olist,.ulist .ulist,.ulist .olist,.olist .ulist{margin-bottom:.625em}
+ul.checklist,ul.none,ol.none,ul.no-bullet,ol.no-bullet,ol.unnumbered,ul.unstyled,ol.unstyled{list-style-type:none}
+ul.no-bullet,ol.no-bullet,ol.unnumbered{margin-left:.625em}
+ul.unstyled,ol.unstyled{margin-left:0}
+ul.checklist>li>p:first-child{margin-left:-1em}
+ul.checklist>li>p:first-child>.fa-square-o:first-child,ul.checklist>li>p:first-child>.fa-check-square-o:first-child{width:1.25em;font-size:.8em;position:relative;bottom:.125em}
+ul.checklist>li>p:first-child>input[type=checkbox]:first-child{margin-right:.25em}
+ul.inline{display:flex;flex-flow:row wrap;list-style:none;margin:0 0 .625em -1.25em}
+ul.inline>li{margin-left:1.25em}
+.unstyled dl dt{font-weight:400;font-style:normal}
+ol.arabic{list-style-type:decimal}
+ol.decimal{list-style-type:decimal-leading-zero}
+ol.loweralpha{list-style-type:lower-alpha}
+ol.upperalpha{list-style-type:upper-alpha}
+ol.lowerroman{list-style-type:lower-roman}
+ol.upperroman{list-style-type:upper-roman}
+ol.lowergreek{list-style-type:lower-greek}
+.hdlist>table,.colist>table{border:0;background:none}
+.hdlist>table>tbody>tr,.colist>table>tbody>tr{background:none}
+td.hdlist1,td.hdlist2{vertical-align:top;padding:0 .625em}
+td.hdlist1{font-weight:bold;padding-bottom:1.25em}
+td.hdlist2{word-wrap:anywhere}
+.literalblock+.colist,.listingblock+.colist{margin-top:-.5em}
+.colist td:not([class]):first-child{padding:.4em .75em 0;line-height:1;vertical-align:top}
+.colist td:not([class]):first-child img{max-width:none}
+.colist td:not([class]):last-child{padding:.25em 0}
+.thumb,.th{line-height:0;display:inline-block;border:4px solid #fff;box-shadow:0 0 0 1px #ddd}
+.imageblock.left{margin:.25em .625em 1.25em 0}
+.imageblock.right{margin:.25em 0 1.25em .625em}
+.imageblock>.title{margin-bottom:0}
+.imageblock.thumb,.imageblock.th{border-width:6px}
+.imageblock.thumb>.title,.imageblock.th>.title{padding:0 .125em}
+.image.left,.image.right{margin-top:.25em;margin-bottom:.25em;display:inline-block;line-height:0}
+.image.left{margin-right:.625em}
+.image.right{margin-left:.625em}
+a.image{text-decoration:none;display:inline-block}
+a.image object{pointer-events:none}
+sup.footnote,sup.footnoteref{font-size:.875em;position:static;vertical-align:super}
+sup.footnote a,sup.footnoteref a{text-decoration:none}
+sup.footnote a:active,sup.footnoteref a:active{text-decoration:underline}
+#footnotes{padding-top:.75em;padding-bottom:.75em;margin-bottom:.625em}
+#footnotes hr{width:20%;min-width:6.25em;margin:-.25em 0 .75em;border-width:1px 0 0}
+#footnotes .footnote{padding:0 .375em 0 .225em;line-height:1.3334;font-size:.875em;margin-left:1.2em;margin-bottom:.2em}
+#footnotes .footnote a:first-of-type{font-weight:bold;text-decoration:none;margin-left:-1.05em}
+#footnotes .footnote:last-of-type{margin-bottom:0}
+#content #footnotes{margin-top:-.625em;margin-bottom:0;padding:.75em 0}
+.gist .file-data>table{border:0;background:#fff;width:100%;margin-bottom:0}
+.gist .file-data>table td.line-data{width:99%}
+div.unbreakable{page-break-inside:avoid}
+.big{font-size:larger}
+.small{font-size:smaller}
+.underline{text-decoration:underline}
+.overline{text-decoration:overline}
+.line-through{text-decoration:line-through}
+.aqua{color:#00bfbf}
+.aqua-background{background:#00fafa}
+.black{color:#000}
+.black-background{background:#000}
+.blue{color:#0000bf}
+.blue-background{background:#0000fa}
+.fuchsia{color:#bf00bf}
+.fuchsia-background{background:#fa00fa}
+.gray{color:#606060}
+.gray-background{background:#7d7d7d}
+.green{color:#006000}
+.green-background{background:#007d00}
+.lime{color:#00bf00}
+.lime-background{background:#00fa00}
+.maroon{color:#600000}
+.maroon-background{background:#7d0000}
+.navy{color:#000060}
+.navy-background{background:#00007d}
+.olive{color:#606000}
+.olive-background{background:#7d7d00}
+.purple{color:#600060}
+.purple-background{background:#7d007d}
+.red{color:#bf0000}
+.red-background{background:#fa0000}
+.silver{color:#909090}
+.silver-background{background:#bcbcbc}
+.teal{color:#006060}
+.teal-background{background:#007d7d}
+.white{color:#bfbfbf}
+.white-background{background:#fafafa}
+.yellow{color:#bfbf00}
+.yellow-background{background:#fafa00}
+span.icon>.fa{cursor:default}
+a span.icon>.fa{cursor:inherit}
+.admonitionblock td.icon [class^="fa icon-"]{font-size:2.5em;text-shadow:1px 1px 2px rgba(0,0,0,.5);cursor:default}
+.admonitionblock td.icon .icon-note::before{content:"\f05a";color:#19407c}
+.admonitionblock td.icon .icon-tip::before{content:"\f0eb";text-shadow:1px 1px 2px rgba(155,155,0,.8);color:#111}
+.admonitionblock td.icon .icon-warning::before{content:"\f071";color:#bf6900}
+.admonitionblock td.icon .icon-caution::before{content:"\f06d";color:#bf3400}
+.admonitionblock td.icon .icon-important::before{content:"\f06a";color:#bf0000}
+.conum[data-value]{display:inline-block;color:#fff!important;background:rgba(0,0,0,.8);border-radius:50%;text-align:center;font-size:.75em;width:1.67em;height:1.67em;line-height:1.67em;font-family:"Open Sans","DejaVu Sans",sans-serif;font-style:normal;font-weight:bold}
+.conum[data-value] *{color:#fff!important}
+.conum[data-value]+b{display:none}
+.conum[data-value]::after{content:attr(data-value)}
+pre .conum[data-value]{position:relative;top:-.125em}
+b.conum *{color:inherit!important}
+.conum:not([data-value]):empty{display:none}
+dt,th.tableblock,td.content,div.footnote{text-rendering:optimizeLegibility}
+h1,h2,p,td.content,span.alt,summary{letter-spacing:-.01em}
+p strong,td.content strong,div.footnote strong{letter-spacing:-.005em}
+p,blockquote,dt,td.content,span.alt,summary{font-size:1.0625rem}
+p{margin-bottom:1.25rem}
+.sidebarblock p,.sidebarblock dt,.sidebarblock td.content,p.tableblock{font-size:1em}
+.exampleblock>.content{background:#fffef7;border-color:#e0e0dc;box-shadow:0 1px 4px #e0e0dc}
+.print-only{display:none!important}
+@page{margin:1.25cm .75cm}
+@media print{*{box-shadow:none!important;text-shadow:none!important}
+    html{font-size:80%}
+    a{color:inherit!important;text-decoration:underline!important}
+    a.bare,a[href^="#"],a[href^="mailto:"]{text-decoration:none!important}
+    a[href^="http:"]:not(.bare)::after,a[href^="https:"]:not(.bare)::after{content:"(" attr(href) ")";display:inline-block;font-size:.875em;padding-left:.25em}
+    abbr[title]{border-bottom:1px dotted}
+    abbr[title]::after{content:" (" attr(title) ")"}
+    pre,blockquote,tr,img,object,svg{page-break-inside:avoid}
+    thead{display:table-header-group}
+    svg{max-width:100%}
+    p,blockquote,dt,td.content{font-size:1em;orphans:3;widows:3}
+    h2,h3,#toctitle,.sidebarblock>.content>.title{page-break-after:avoid}
+    #header,#content,#footnotes,#footer{max-width:none}
+    #toc,.sidebarblock,.exampleblock>.content{background:none!important}
+    #toc{border-bottom:1px solid #dddddf!important;padding-bottom:0!important}
+    body.book #header{text-align:center}
+    body.book #header>h1:first-child{border:0!important;margin:2.5em 0 1em}
+    body.book #header .details{border:0!important;display:block;padding:0!important}
+    body.book #header .details span:first-child{margin-left:0!important}
+    body.book #header .details br{display:block}
+    body.book #header .details br+span::before{content:none!important}
+    body.book #toc{border:0!important;text-align:left!important;padding:0!important;margin:0!important}
+    body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-break-before:always}
+    .listingblock code[data-lang]::before{display:block}
+    #footer{padding:0 .9375em}
+    .hide-on-print{display:none!important}
+    .print-only{display:block!important}
+    .hide-for-print{display:none!important}
+    .show-for-print{display:inherit!important}}
+@media amzn-kf8,print{#header>h1:first-child{margin-top:1.25rem}
+    .sect1{padding:0!important}
+    .sect1+.sect1{border:0}
+    #footer{background:none}
+    #footer-text{color:rgba(0,0,0,.6);font-size:.9em}}
+@media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}
+
+img#fork {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 200px;
+    height: 200px;
+}
+
+div.imageblock > div.title {
+    text-align: center;
+    padding-top: 15px;
+}
+
+div.videoblock > div.content, div.imageblock > div.content {
+    text-align: center;
+}
+
+details > summary {
+    font-style: italic;
+    color: #ba3925;
+}
+
+details > summary::after {
+    content: "💡";
+    position: relative;
+    left: 5px;
+    top: -1px;
+    font-style: normal;
+}
+
+details[open] > summary::after {
+    content: "";
+}
+
+.admonitionblock td.content > .title {
+    font-size: 1.2rem;
+    font-style: normal;
+    font-weight: bold;
+}
+
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/styles/github.min.css">
+</head>
+<body class="article">
+<div id="header">
+<h1>Apache APISIX Hands-on Lab</h1>
+<div class="details">
+<span id="author" class="author">Nicolas Fränkel</span><br>
+</div>
+</div>
+<div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<a href="https://github.com/nfrankel/apisix-workshop/fork" target="_blank"><img id="fork" decoding="async" src="./forkme_right_green_007200.svg" class="attachment-full size-full" alt="Fork me on GitHub" loading="lazy" data-recalc-dims="1"></a>
+<div class="paragraph">
+<p>Welcome to this workshop on <a href="https://apisix.apache.org/" target="_blank" rel="noopener">Apache APISIX</a>!
+We will show here a couple of APISIX&#8217;s nifty features that can help your information system cope with the challenges introduced by APIs:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Routing your calls to an <code>Upstream</code></p>
+</li>
+<li>
+<p>Available abstractions: <code>Route</code>, <code>Upstream</code>, <code>Consumer</code>, and <code>Plugin</code></p>
+</li>
+<li>
+<p>The Apache APISIX dashboard</p>
+</li>
+<li>
+<p>Configuring APISIX with the dashboard</p>
+</li>
+<li>
+<p>Configuring APISIX with the command-line</p>
+</li>
+<li>
+<p>Monitoring APISIX</p>
+</li>
+<li>
+<p>Introduction to plugin development in Lua</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The workshop is designed to be self-driven, but if at any point, you need help, just ask the instructor.</p>
+</div>
+<div id="toc" class="toc">
+<div id="toctitle" class="title">Table of Contents</div>
+<ul class="sectlevel1">
+<li><a href="#_preparing_for_the_workshop">1. Preparing for the workshop</a></li>
+<li><a href="#_first_steps">2. First steps</a>
+<ul class="sectlevel2">
+<li><a href="#_dynamic_configuration_vs_static_configuration">2.1. Dynamic configuration vs. static configuration</a></li>
+<li><a href="#_our_first_route">2.2. Our first <code>Route</code></a></li>
+<li><a href="#_create_an_upstream">2.3. Create an <code>Upstream</code></a></li>
+<li><a href="#_bind_the_route_to_the_upstream">2.4. Bind the <code>Route</code> to the <code>Upstream</code></a></li>
+</ul>
+</li>
+<li><a href="#_the_apisix_dashboard">3. The APISIX Dashboard</a>
+<ul class="sectlevel2">
+<li><a href="#_display_the_existing_objects">3.1. Display the existing objects</a></li>
+<li><a href="#_update_existing_objects">3.2. Update existing objects</a></li>
+</ul>
+</li>
+<li><a href="#_authenticating_client_requests">4. Authenticating client requests</a>
+<ul class="sectlevel2">
+<li><a href="#_create_a_consumer">4.1. Create a <code>Consumer</code></a></li>
+<li><a href="#_add_a_plugin_to_a_route_object">4.2. Add a <code>Plugin</code> to a <code>Route</code> object</a></li>
+</ul>
+</li>
+<li><a href="#_managing_quotas">5. Managing quotas</a>
+<ul class="sectlevel2">
+<li><a href="#_limit_count_plugin">5.1. Limit Count Plugin</a></li>
+<li><a href="#_using_the_dashboard_to_set_the_limit">5.2. Using the Dashboard to set the limit</a></li>
+<li><a href="#_promoting_a_consumer">5.3. Promoting a <code>Consumer</code></a></li>
+<li><a href="#_consumer_groups">5.4. Consumer groups</a></li>
+</ul>
+</li>
+<li><a href="#_handling_permissions">6. Handling permissions</a></li>
+<li><a href="#_disabling_and_removing_a_plugin">7. Disabling and removing a plugin</a></li>
+<li><a href="#_observing_apache_apisix">8. Observing Apache APISIX</a>
+<ul class="sectlevel2">
+<li><a href="#_metrics">8.1. Metrics</a></li>
+<li><a href="#_logs">8.2. Logs</a></li>
+<li><a href="#_traces">8.3. Traces</a></li>
+</ul>
+</li>
+<li><a href="#_advanced_use_cases">9. Advanced use-cases</a>
+<ul class="sectlevel2">
+<li><a href="#_jwt_authentication">9.1. JWT authentication</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="title">Credits</div>
+<div class="paragraph">
+<p>The workshop was initially designed by Bobur Umurzukov with my help.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<h2 id="_overview" class="discrete">Overview</h2>
+<div class="paragraph right">
+<p><span class="image"><img src="./apisix-logo.png" alt="Apache APISIX logo" width="200" height="200"></span></p>
+</div>
+<div class="paragraph">
+<p>This section explains the context of the workshop.
+If you prefer, you can directly skip to the <a href="#prerequisites">hands-on part</a>.</p>
+</div>
+<div class="paragraph">
+<p><a href="https://apisix.apache.org/" target="_blank" rel="noopener">Apache APISIX</a> is an <em>API Gateway</em> steered by the <a href="https://apache.org/" target="_blank" rel="noopener">Apache Foundation</a>.</p>
+</div>
+<div class="paragraph">
+<p>When you expose your services to the outside world, a lot of bad things can happen.
+For instance, a malicious actor could try to access your services without permission.
+Or they could try to access your services with invalid data.
+Or they could try to overload your services with too many requests.</p>
+</div>
+<div class="paragraph">
+<p>You need to protect your services.
+However, it doesn&#8217;t make any sense to let each developer team handle these requirements on each service.
+The age-old solution is to hide your services behind a <em>reverse proxy</em>:
+the reverse proxy is the single point of entry to your information system and protects your services.
+<a href="https://www.nginx.com/" target="_blank" rel="noopener">nginx</a> is a solid and mature reverse-proxy.</p>
+</div>
+<div class="paragraph">
+<p>Because they were designed before APIs, reverse proxies have a big issue:
+they don&#8217;t differentiate between clients.
+For example, to protect agains <abbr title="Distributed Denial of Service">DDoS</abbr> attacks, they can limit the number of requests for all clients.
+Some may even allow to configure different limits for different IP addresses (or ranges).
+However, API providers probably offer different quotas at different prices.
+A single customer may want to subscribe to two different offers, for two different departments with different requirements - and different budgets.</p>
+</div>
+<div class="paragraph">
+<p>That&#8217;s where API Gateways enter the field.
+An API Gateway is a reverse proxy "on steroids".
+It should do everything a reverse proxy does, and more, especially in the context of APIs.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_preparing_for_the_workshop">1. Preparing for the workshop</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p>This workshops is largely based on <a href="https://docs.docker.com/compose/" target="_blank" rel="noopener">Docker Compose</a> v3.
+You need a way to run <a href="https://www.docker.com/" target="_blank" rel="noopener">Docker</a> and Docker Compose files.
+Docker Desktop works.
+If you want to use something else, please feel free to do so but if something doesn&#8217;t work because of it, know that it decreases your chances that the instructor can help you with it.</p>
+</li>
+<li>
+<p>We use the <a href="https://curl.se/docs/manpage.html" target="_blank" rel="noopener">curl</a> command for API testing.
+You can also use other tools, such as <a href="https://www.postman.com/" target="_blank" rel="noopener">Postman</a> or similar.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The workshop is hosted on a <a href="https://github.com/nfrankel/apisix-workshop/" target="_blank" rel="noopener">GitHub repository</a>.
+At the root of the repository is a <code>docker-compose.yml</code> file that defines the infrastructure.</p>
+</div>
+<div class="paragraph">
+<p>Clone the repository:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">git clone https://github.com/nfrankel/apisix-workshop.git</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Switch the current directory to the <code>apisix-workshop</code> path.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">cd apisix-workshop</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Run the <code>docker compose</code> command to start the infrastructure:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">docker compose up</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Once everything is started, we can run a simple <code>curl</code> command to check if APISIX is running.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">curl http://localhost:9180/apisix/admin/routes</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Don&#8217;t worry about the command for now.
+It should return something similar to:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{"list":[],"total":0}</code></pre>
+</div>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+<div class="title">Be mindful of keeping APISIX secure</div>
+<div class="paragraph">
+<p>The Admin API, <em>e.g.</em>, the command to list all routes, is normally secured by an API key.
+In the context of this workshop, this security feature has been disabled to avoid extra typing.
+<strong>You should never ever use this setting in a production environement!</strong>
+Moreover, you should change the default API key before your first deployment.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">deployment:
+  admin:
+    admin_key_required: true            <i class="conum" data-value="1"></i><b>(1)</b>
+    admin_key:
+      - name: admin
+        key: 5om3v3ryl0ng53cr3t         <i class="conum" data-value="2"></i><b>(2)</b>
+        role: admin</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>The default value is <code>true</code>.
+Keep it that way.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Change the keyword to something more secure and keep it secret</td>
+</tr>
+</table>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_first_steps">2. First steps</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In this section, we will create the most basic object in APISIX, the <code>Route</code>.
+When Apache APISIX receives a request matching the <code>Route</code> parameters, it forwards it to the configured service.</p>
+</div>
+<div class="sect2">
+<h3 id="_dynamic_configuration_vs_static_configuration">2.1. Dynamic configuration vs. static configuration</h3>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="title">Configuration or configuration?</div>
+<div class="paragraph">
+<p>In the context of APISIX, configuration can mean two things:
+configuration of APISIX itself or configuration of its routing rules.
+The workshop has taken care of the former, so you can learn about the latter.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Apache APISIX offers two configuration models.
+By default, it uses a dynamic one:
+to configure routing rules, you send HTTP requests to the <em>Admin API</em>.
+Another option is to use static configuration based on a YAML file.
+It&#8217;s the way for GitOps-based organizations.</p>
+</div>
+<div class="paragraph">
+<p>In this workshop, we will focus on dynamic configuration, <em>i.e.</em>, HTTP calls.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_our_first_route">2.2. Our first <code>Route</code></h3>
+<div class="paragraph">
+<p>In this section, we will create our first <code>Route</code>.
+The Docker Compose file defines an <code>httpbin</code> service so you don&#8217;t need Internet access.
+The goal is to create a <code>Route</code> that forwards requests to the <code>httpbin</code> service, in particular:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">curl localhost:9080/anything</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Read the <a href="https://apisix.apache.org/docs/apisix/getting-started/configure-routes/" target="_blank" rel="noopener">documentation</a> and create the <code>Route</code> for the above requirement.</p>
+</div>
+<div class="paragraph">
+<p>If you cannot proceed further or when you are finished, reveal the hint:</p>
+</div>
+<details>
+<summary class="title">See the solution</summary>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">curl http://localhost:9180/apisix/admin/routes/1 -X PUT -d '  <i class="conum" data-value="1"></i><b>(1)</b><i class="conum" data-value="2"></i><b>(2)</b><i class="conum" data-value="3"></i><b>(3)</b>
+{
+  "uri": "/anything*",                    <i class="conum" data-value="4"></i><b>(4)</b>
+  "upstream": {                           <i class="conum" data-value="5"></i><b>(5)</b>
+    "nodes": {
+      "httpbin:80": 1
+    }
+  }
+}'</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>The <code>/apisix/admin/routes</code> endpoint manages <code>Route</code> objects.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Because configuration is a highly critical feature, we need to authenticate via an API key.
+Here, we use the default one.
+It&#8217;s highly advised to generate your own, and regularly change it.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>APISIX can match on several parameters:
+host, HTTP method(s), path, and client IP addresses.
+Only the path is required.
+If methods are not specified, it matches all methods.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Notice the star character:
+every URI starting with <code>/anything/</code> matches the <code>Route</code>.</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="5"></i><b>5</b></td>
+<td><code>Upstream</code> defined embedded in the <code>Route</code>.
+An <code>Upstream</code> references a cluster of nodes, which you can load balance across, depending on an algorithm.
+The default algorithm is <em>round robbin</em>.
+Here, we have a single <code>Upstream</code>.</td>
+</tr>
+</table>
+</div>
+</div>
+</details>
+<div class="paragraph">
+<p>At this point, we can check whether the configuration works:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">curl http://localhost:9080/anything</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Astute readers might have noticed that the Admin API runs on port <code>9180</code> while the Gateway operates on port <code>9080</code>.
+It allows to expose the latter to the outside world while keeping the former private for security reasons.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_create_an_upstream">2.3. Create an <code>Upstream</code></h3>
+<div class="paragraph">
+<p>In the previous section, we created a <code>Route</code> with an embedded <code>Upstream</code>.
+The problem with this approach is that you need to define the same <code>Upstream</code> in all the <code>Route</code> objects that use it.
+APISIX offers a better way to manage this: the <code>Upstream</code> object.
+We can create an <code>Upstream</code> once and reference it throughout multiple <code>Route</code> objects.</p>
+</div>
+<div class="paragraph">
+<p>The Apache APISIX API is consistent:
+the API for <code>Upstream</code> is similar to the API for <code>Route</code>.
+With the help of the <a href="https://apisix.apache.org/docs/apisix/admin-api/#upstream-api" target="_blank" rel="noopener">documentation</a> and the command used to create the Route above, create an <code>Upstream</code> with the following properties:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>ID: <code>1</code></p>
+</li>
+<li>
+<p>Single node</p>
+</li>
+<li>
+<p>The node points to <code>httpbin:80</code></p>
+</li>
+</ul>
+</div>
+<details>
+<summary class="title">See the command</summary>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">curl http://localhost:9180/apisix/admin/upstreams/1 -X PUT -d '
+{
+  "nodes": {
+    "httpbin:80": 1
+  }
+}'</code></pre>
+</div>
+</div>
+</div>
+</details>
+<div class="paragraph">
+<p>You can configure the <code>Upstream</code> with additional properties like health check, retries, retry timeout or load-balancing to multiple systems.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_bind_the_route_to_the_upstream">2.4. Bind the <code>Route</code> to the <code>Upstream</code></h3>
+<div class="paragraph">
+<p>In the previous section, we created an <code>Upstream</code> that referenced our backend service.
+It can be referenced by <code>upstream_id</code> in a <code>Route</code>.
+Create a new <code>Route</code> that references it with the help of the <a href="https://apisix.apache.org/docs/apisix/admin-api/#route-api" target="_blank" rel="noopener">documentation</a>.</p>
+</div>
+<details>
+<summary class="title">See the command</summary>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">curl http://localhost:9180/apisix/admin/routes/1 -X PUT -d ' <i class="conum" data-value="1"></i><b>(1)</b>
+{
+  "uri": "/anything*",           <i class="conum" data-value="2"></i><b>(2)</b>
+  "upstream_id": 1               <i class="conum" data-value="3"></i><b>(3)</b>
+}'</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>We use the same id <code>1</code> as above, so we are replacing the previous <code>Route</code> with this one</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Match the <code>/anything*</code> path as before</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Forwards to the <code>Upstream</code> defined above</td>
+</tr>
+</table>
+</div>
+</div>
+</details>
+<div class="paragraph">
+<p>Let&#8217;s test:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">curl localhost:9080/anything/goes</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>It should return the expected data from the configured <code>Upstream</code>.</p>
+</div>
+<div class="paragraph">
+<p><code>Upstream</code> objects are a powerful abstraction in Apache APISIX.
+They allow to define a single object across multiple <code>Route</code> objects so that there is only a single <code>Upstream</code> that needs to be maintained.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_the_apisix_dashboard">3. The APISIX Dashboard</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Along with the Admin API, Apache APISIX offers a Dashboard.
+The <a href="https://github.com/apache/apisix-dashboard" target="_blank" rel="noopener">Apache APISIX Dashboard</a> is designed to make it as easy as possible for users to configure Apache APISIX via a <abbr title="Graphical User Interface">GUI</abbr>.
+You can find more information about the APISIX Dashboard in the <a href="https://apisix.apache.org/docs/dashboard/USER_GUIDE" target="_blank" rel="noopener">user guide</a>.</p>
+</div>
+<div class="paragraph">
+<p>If you have time, the Getting started with Apache APISIX Dashboard video tutorial is a good introduction to the dashboard:</p>
+</div>
+<div class="videoblock">
+<div class="content">
+<iframe width="840" height="470" src="https://www.youtube.com/embed/-9-HZKK2ccI?rel=0" frameborder="0" allowfullscreen></iframe>
+</div>
+</div>
+<div class="olist NOTE">
+<ol class="NOTE">
+<li>
+<p>The Dashboard uses the Admin API</p>
+</li>
+</ol>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="paragraph">
+<p>The Dashboard sends Admin API requests behind the scenes.
+You can verify this claim by interacting with the dashboard with your favorite&#8217;s browser tools enabled.
+Hence, whatever we do with the dashboard, we can do with the Admin API.</p>
+</div>
+<div class="paragraph">
+<p>The reverse is not true:
+the Dashboard doesn&#8217;t cover every API call available.</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Remember that though the backend service could implement it, it&#8217;s more efficient to factor this feature in the API Gateway than to implement it in every service.
+For this reason, we are going to add authentication to the Route.</p>
+</div>
+<div class="sect2">
+<h3 id="_display_the_existing_objects">3.1. Display the existing objects</h3>
+<div class="paragraph">
+<p>So far, we created a <code>Route</code> and an <code>Upstream</code> via the <abbr title="Command-Line Interface">CLI </abbr>.
+We can see the result of our work on the dashboard.
+It&#8217;s accessible at <a href="http://localhost:9000/" class="bare">http://localhost:9000/</a>.
+The credentials are <code>admin</code>/<code>admin</code> by default.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="./dashboard-login.png" alt="APISIX Dashboard login" width="437" height="579">
+</div>
+<div class="title">Figure 1. APISIX Dashboard login</div>
+</div>
+<div class="paragraph">
+<p>After logging, go to <b class="button">Route</b> in the navigation bar on the left side.
+In the <code>Route</code> list, we can see the <code>Route</code> we created previously.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="./dashboard-routes-list.png" alt="Routes List on the APISIX Dashboard">
+</div>
+<div class="title">Figure 2. Routes List on the APISIX Dashboard</div>
+</div>
+<div class="paragraph">
+<p>Next, navigate to <b class="button">Upstream</b>.
+Likewise, the dashboard displays our <code>Upstream</code>.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="./dashboard-upstreams-list.png" alt="Upstreams List on the APISIX Dashboard">
+</div>
+<div class="title">Figure 3. Upstreams List on the APISIX Dashboard</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_update_existing_objects">3.2. Update existing objects</h3>
+<div class="paragraph">
+<p>The Dashboard allows not only viewing existing objects but also creating, updating and deleting object.
+At the moment, neither the <code>Route</code> nor the <code>Upstream</code> have a user-friendly name.
+We will use two different methods to add one:
+via the <em>Configure</em> wizard and directly via the JSON object.</p>
+</div>
+<div class="sect3">
+<h4 id="_updating_via_the_configure_wizard">3.2.1. Updating via the Configure wizard</h4>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Go to the <code>Upstream</code> screen</p>
+</li>
+<li>
+<p>Click the <b class="button">Configure</b> button for the single <code>Upstream</code> displayed</p>
+</li>
+<li>
+<p>In the opening screen, set a name, <em>e.g.</em>, "Local httpbin"</p>
+<div class="imageblock">
+<div class="content">
+<img src="./dashboard-upstream-details.png" alt="Upstream details on the APISIX Dashboard">
+</div>
+<div class="title">Figure 4. Upstream details on the APISIX Dashboard</div>
+</div>
+</li>
+<li>
+<p>Click <b class="button">Next</b>, then <b class="button">Submit</b>.
+The list now displays the <code>Upstream</code> with its updated name.</p>
+<div class="imageblock">
+<div class="content">
+<img src="./dashboard-upstreams-list-updated.png" alt="Updated Upstream list on the APISIX Dashboard">
+</div>
+<div class="title">Figure 5. Updated Upstream list on the APISIX Dashboard</div>
+</div>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_updating_via_json">3.2.2. Updating via JSON</h4>
+<div class="paragraph">
+<p>As an alternative to the wizard, we can directly update an object&#8217;s JSON configuration.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Navigate to the <code>Route</code> screen</p>
+</li>
+<li>
+<p>On the right side of the <code>Route</code> object, locate the <span class="menuseq"><b class="menu">More</b>&#160;<i class="fa fa-angle-right caret"></i> <b class="menuitem">View</b></span> button</p>
+<div class="imageblock">
+<div class="content">
+<img src="./dashboard-routes-list-view.png" alt="Routes List on the APISIX Dashboard">
+</div>
+<div class="title">Figure 6. Routes List on the APISIX Dashboard</div>
+</div>
+</li>
+<li>
+<p>On the opening screen, change the name to something more descriptive, <em>e.g</em>, "Anything"</p>
+<div class="imageblock">
+<div class="content">
+<img src="./dashboard-route-details-raw.png" alt="Route Raw Configuration Editor" width="700" height="332">
+</div>
+<div class="title">Figure 7. Route Raw Configuration Editor on the APISIX Dashboard</div>
+</div>
+</li>
+<li>
+<p>In the list, we can now see the updated <code>Route</code> name</p>
+<div class="imageblock">
+<div class="content">
+<img src="./dashboard-routes-list-updated.png" alt="Updated Routes list on the APISIX Dashboard">
+</div>
+<div class="title">Figure 8. Updated Routes list on the APISIX Dashboard</div>
+</div>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>This is but a taste of the Apache APISIX Dasboard.
+We continue the workshop with the CLI.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_authenticating_client_requests">4. Authenticating client requests</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The <code>Route</code> we have created above is public.
+Thus, anyone can access the underlying <code>Upstream</code> as long as they know the endpoint Apache APISIX exposes to the outside world.
+It&#8217;s not safe, as a malicious actor could use this endpoint.
+In this section, we are going to set up authentication for requests to our local <code>httpbin</code> <code>Upstream</code>.</p>
+</div>
+<div class="sect2">
+<h3 id="_create_a_consumer">4.1. Create a <code>Consumer</code></h3>
+<div class="paragraph">
+<p>Authentication is tied to an <em>identity</em>; Apache APISIX represents an identity as a <code>Consumer</code> object.
+With the help of the <a href="https://apisix.apache.org/docs/apisix/admin-api/#consumer" target="_blank" rel="noopener">Admin API</a>, list all existing <code>Consumer</code> objects; there should be none.</p>
+</div>
+<details>
+<summary class="title">See the command</summary>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">curl http://localhost:9180/apisix/admin/consumers</code></pre>
+</div>
+</div>
+</div>
+</details>
+<div class="paragraph">
+<p>Now, let&#8217;s create a <code>Consumer</code> object with the name <code>johndoe</code>.</p>
+</div>
+<details>
+<summary class="title">See the command</summary>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">curl http://localhost:9180/apisix/admin/consumers -X PUT -d '
+{
+  "username": "johndoe"
+}'</code></pre>
+</div>
+</div>
+</div>
+</details>
+<div class="paragraph">
+<p>Now, list the <code>Consumer</code> objects again.
+The result should be something like this (formatted for ease of reading):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{
+  "list": [
+    {
+      "key": "/apisix/consumers/johndoe",
+      "value": {
+        "update_time": 1714465186,
+        "create_time": 1714461458,
+        "username": "johndoe"
+      },
+      "modifiedIndex": 58,
+      "createdIndex": 38
+    }
+  ],
+  "total": 1
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_add_a_plugin_to_a_route_object">4.2. Add a <code>Plugin</code> to a <code>Route</code> object</h3>
+<div class="paragraph">
+<p>So far, we have used several APISIX abstractions: <code>Route</code>, <code>Upstream</code>, and <code>Consumer</code>.
+We need one more to go further.
+Apache APISIX builds upon a plugin-based architecture:
+every functionality such as rate limiting, authentication, etc. is implemented via a <code>Plugin</code> object.
+APISIX comes with a large set of <a href="https://apisix.apache.org/plugins/" target="_blank" rel="noopener">built-in plugins</a> for common capabilities, but you can create your own in case you can&#8217;t find one that fits your requirements.</p>
+</div>
+<div class="paragraph">
+<p><a href="https://apisix.apache.org/plugins/#Authentication" target="_blank" rel="noopener">A couple of existing plugins</a> implement authentication.
+To keep things simple, we are going to use the simplest one, the <a href="https://apisix.apache.org/docs/apisix/plugins/key-auth/" target="_blank" rel="noopener">key-auth</a> plugin.
+With this plugin, we can authenticate requests based on either an HTTP header or a query parameter.
+First, we need to add the <code>Plugin</code> to the <code>Route</code>.
+Use the Admin API to enable the <code>key-auth</code> plugin for the <code>Route</code> we created earlier.</p>
+</div>
+<details>
+<summary class="title">See the command</summary>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">curl http://localhost:9180/apisix/admin/routes/1 -X PATCH -d ' <i class="conum" data-value="1"></i><b>(1)</b><i class="conum" data-value="2"></i><b>(2)</b><i class="conum" data-value="3"></i><b>(3)</b>
+{
+  "plugins": {
+    "key-auth": {}              <i class="conum" data-value="4"></i><b>(4)</b>
+  }
+}'</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Use the <code>/routes</code> endpoints</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Work on the <code>Route</code> with ID <code>1</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Patch the exising <code>Route</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="4"></i><b>4</b></td>
+<td>Set the <code>key-auth</code> plugin with no additional configuration</td>
+</tr>
+</table>
+</div>
+</div>
+</details>
+<div class="paragraph">
+<p>At this point, we control who can access the <code>/anything</code> endpoint by authenticating requests.
+Requests that don&#8217;t include a valid API key are rejected with an HTTP <code>401</code> status.
+Let&#8217;s check:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">curl -i localhost:9080/anything</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Because we didn&#8217;t set the authentication key, Apache APISIX will return a <code>401 Unauthorized</code> error.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-http hljs" data-lang="http">HTTP/1.1 401 Unauthorized
+Date: Tue, 30 Apr 2024 08:38:38 GMT
+Content-Type: text/plain; charset=utf-8
+Transfer-Encoding: chunked
+Connection: keep-alive
+Server: APISIX/3.9.0
+
+{"message":"Missing API key found in request"}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>To authenticate, we need to set the key on the <code>Consumer</code> object.
+With the help of the <a href="https://apisix.apache.org/docs/apisix/admin-api/#consumer-api" target="_blank" rel="noopener">Admin API</a>, update <code>johndoe</code> with an API key, <em>e.g.</em>, <code>john</code>.</p>
+</div>
+<details>
+<summary class="title">See the command</summary>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">curl http://localhost:9180/apisix/admin/consumers/johndoe -X PUT -d ' <i class="conum" data-value="1"></i><b>(1)</b><i class="conum" data-value="2"></i><b>(2)</b>
+{
+  "username": "johndoe",        <i class="conum" data-value="2"></i><b>(2)</b>
+  "plugins": {
+    "key-auth": {
+      "key": "john"             <i class="conum" data-value="3"></i><b>(3)</b>
+    }
+  }
+}'</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Use the <code>/consumers</code> endpoints</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>The Consumers API doesn&#8217;t support patching existing objects.
+We need to use <code>PUT</code> <strong>and</strong> specify which <code>Consumer</code> object to work on</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Set the <code>key-auth</code> plugin with no additional configuration</td>
+</tr>
+</table>
+</div>
+</div>
+</details>
+<div class="paragraph">
+<p>We can now retry the same request with the authentication key.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">curl -i -H 'apikey: john' localhost:9080/anything           <i class="conum" data-value="1"></i><b>(1)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>The default header name is <code>apikey</code>.
+You can override it in the <code>Plugin</code> configuration.</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>We can now successfully access the endpoint!</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-http hljs" data-lang="http">HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 334
+Connection: keep-alive
+Date: Tue, 30 Apr 2024 08:50:12 GMT
+Access-Control-Allow-Origin: *
+Access-Control-Allow-Credentials: true
+Server: APISIX/3.9.0
+
+{
+  "args": {},
+  "data": "",
+  "files": {},
+  "form": {},
+  "headers": {
+    "Accept": "*/*",
+    "Apikey": "john",
+    "Host": "localhost:9080",
+    "User-Agent": "curl/8.4.0",
+    "X-Forwarded-Host": "localhost"
+  },
+  "json": null,
+  "method": "GET",
+  "origin": "192.168.65.1",
+  "url": "http://localhost/anything"
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In this section, we learned about the <code>Consumer</code> and <code>Plugin</code> objects, and how to implement a simple authentication mechanism with the <code>key-auth</code> plugin.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_managing_quotas">5. Managing quotas</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In this section, we are going to describe several ways to set quotas on your APIs.</p>
+</div>
+<div class="sect2">
+<h3 id="_limit_count_plugin">5.1. Limit Count Plugin</h3>
+<div class="paragraph">
+<p>Traffic management is a must-have of any <em>reverse proxy</em> worth their salt.
+An API Gateway is no exception.
+Rate limiting is a strategy for limiting network traffic.
+It puts a cap on how often someone can repeat an action within a specific timeframe – for instance, trying to log into an account.</p>
+</div>
+<div class="paragraph">
+<p>Apache APISIX offers no less than three plugins to rate limit requests:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://apisix.apache.org/docs/apisix/plugins/limit-conn/" target="_blank" rel="noopener">limit conn</a>: limits the number of concurrent requests</p>
+</li>
+<li>
+<p><a href="https://https://apisix.apache.org/docs/apisix/plugins/limit-req/" target="_blank" rel="noopener">limit req</a>: limits the number of requests based on the <a href="https://en.wikipedia.org/wiki/Leaky_bucket" target="_blank" rel="noopener">Leaky Bucket</a> algorithm</p>
+</li>
+<li>
+<p><a href="https://https://apisix.apache.org/docs/apisix/plugins/limit-count/" target="_blank" rel="noopener">limit count</a>: limits the number of requests based on a fixed time window</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The <code>limit-count</code> plugin is the simplest one and a good candidate for this workshop.</p>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s enable the <code>limit-count</code> plugin on our existing Route.
+The requirements are as follow:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>The limit is at most 1 request per minute</p>
+</li>
+<li>
+<p>If the limit is exceeded, the HTTP status code should be <code>429</code> and the message should be <code>You have exceeded your quota, try again later</code></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>With the help of the <a href="https://apisix.apache.org/docs/apisix/admin-api/#route-api" target="_blank" rel="noopener">Admin API</a> and the <a href="https://apisix.apache.org/docs/apisix/plugins/limit-count/" target="_blank" rel="noopener">plugin</a> documentation, set the <code>limit-count</code> plugin on the <code>Route</code> with ID <code>1</code> with the above parameters.</p>
+</div>
+<details>
+<summary class="title">See the command</summary>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">curl http://localhost:9180/apisix/admin/routes/1/plugins/limit-count -X PATCH -d ' <i class="conum" data-value="1"></i><b>(1)</b>
+{
+  "count": 1,
+  "time_window": 60,                                             <i class="conum" data-value="2"></i><b>(2)</b>
+  "rejected_code": 429,                                          <i class="conum" data-value="3"></i><b>(3)</b>
+  "rejected_msg": "You''ve exceeded your quota, try again later" <i class="conum" data-value="3"></i><b>(3)</b>
+}'</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Path to the new plugin, <em>i.e.</em>, <code>/routes/1/plugins/limit-count</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>The unit is in seconds</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Other parameters fulfill the above requirements</td>
+</tr>
+</table>
+</div>
+</div>
+</details>
+<div class="paragraph">
+<p>We can try to send a request as above.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">curl -H 'apikey: john' localhost:9080/anything
+curl -H 'apikey: john' localhost:9080/anything</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The first request should work, but the second one should return a <code>429</code> status code.</p>
+</div>
+<div class="paragraph">
+<p>Notice that the response contains additional headers to help clients understand where they stand:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>X-RateLimit-Limit: 1           <i class="conum" data-value="1"></i><b>(1)</b>
+X-RateLimit-Remaining: 0       <i class="conum" data-value="2"></i><b>(2)</b>
+X-RateLimit-Reset: 56          <i class="conum" data-value="3"></i><b>(3)</b></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>The limit we set (per minute)</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>The remaining number of requests allowed</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>The time in seconds until the limit resets</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_using_the_dashboard_to_set_the_limit">5.2. Using the Dashboard to set the limit</h3>
+<div class="paragraph">
+<p>As an alternative to the above, we can use the Dashboard to set the <code>limit-count</code> plugin on the <code>Route</code>.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Go to the <a href="http://localhost:9000/" target="_blank" rel="noopener">Dashboard</a></p>
+</li>
+<li>
+<p>Click on the <b class="button">Route</b> menu item</p>
+</li>
+<li>
+<p>Press <b class="button">Configure</b> on the <code>Route</code> you want to add the <code>Plugin</code> to</p>
+</li>
+<li>
+<p>In the first screen of the wizard, we need to fill in the name if it&#8217;s not already the case</p>
+<div class="imageblock">
+<div class="content">
+<img src="./plugin-configure-route.png" alt="Configure Route wizard - Define API request">
+</div>
+<div class="title">Figure 9. Configure Route wizard - Define API request</div>
+</div>
+</li>
+<li>
+<p>Click <b class="button">Next</b></p>
+</li>
+<li>
+<p>On the next screen, labeled "Define API Backend Server", we need to select <code>1</code> in the Upstream field drop-down</p>
+</li>
+<li>
+<p>Click <b class="button">Next</b></p>
+</li>
+<li>
+<p>Finally, on the third screen, the Dashboard presents the list of available plugins</p>
+<div class="imageblock">
+<div class="content">
+<img src="./plugin-list.png" alt="Configure Route wizard - List of available plugins">
+</div>
+<div class="title">Figure 10. Configure Route wizard - List of available plugins</div>
+</div>
+</li>
+<li>
+<p>Select the <b class="menuref">Traffic Control</b> menu item on the left inner menu</p>
+</li>
+<li>
+<p>The UI scrolls to show us the available plugins in this category</p>
+<div class="imageblock">
+<div class="content">
+<img src="./plugin-traffic-control.png" alt="Configure Route wizard - Traffic control plugins">
+</div>
+<div class="title">Figure 11. Configure Route wizard - Traffic control plugins</div>
+</div>
+</li>
+<li>
+<p>Press <b class="button">Enable</b> on the <code>limit-count</code> plugin</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Switch on the <b class="button">Enable</b> toggle button</p>
+</li>
+<li>
+<p>Set the <code>count</code> field to <code>1</code></p>
+</li>
+<li>
+<p>Set the <code>time_window</code> field to <code>60</code></p>
+</li>
+<li>
+<p>Set the <code>rejected_code</code> field to <code>429</code></p>
+</li>
+<li>
+<p>Set the <code>rejected_message</code> field to <code>You have exceeded your quota, try again later</code></p>
+<div class="imageblock">
+<div class="content">
+<img src="./plugin-editor.png" alt="Configure Route wizard - Plugin editor" width="700" height="691">
+</div>
+<div class="title">Figure 12. Configure Route wizard - Plugin editor</div>
+</div>
+</li>
+<li>
+<p>Click <b class="button">Submit</b></p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>The wizard puts us back on the third step, but the configured plugin should be displayed differently</p>
+<div class="paragraph">
+<div class="title">Configure Route wizard - Plugin enabled</div>
+<p><span class="image"><img src="./;plugin-list-enabled.png" alt="Configure Route wizard - Plugin enabled"></span></p>
+</div>
+</li>
+<li>
+<p>Press <b class="button">Next</b></p>
+</li>
+<li>
+<p>Click <b class="button">Submit</b> to finish the wizard</p>
+<div class="imageblock">
+<div class="content">
+<img src="./plugin-finish-success.png" alt="Configure Route wizard - Success!">
+</div>
+<div class="title">Figure 13. Configure Route wizard - Success!</div>
+</div>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_promoting_a_consumer">5.3. Promoting a <code>Consumer</code></h3>
+<div class="paragraph">
+<p>In the previous section, we set a cap on the number of requests for all consumers.
+However, a real-world scenario is to offer different limits at different prices.
+For instance, a free tier could offer 100 requests per minute, while a premium tier could offer 1000 requests per minute.
+In this section, we are going to create a new <code>Consumer</code> object and set its limit to 5.</p>
+</div>
+<div class="paragraph">
+<p>Using the <a href="https://apisix.apache.org/docs/apisix/admin-api/#consumer-api" target="_blank" rel="noopener">Admin API</a>, create a new <code>Consumer</code> object with the following properties:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Name: <code>janedoe</code></p>
+</li>
+<li>
+<p>Key: <code>jane</code></p>
+</li>
+<li>
+<p>Plugin: <code>limit-count</code> with a limit of 5 requests per minute</p>
+</li>
+</ul>
+</div>
+<details>
+<summary class="title">See the command</summary>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">curl http://127.0.0.1:9180/apisix/admin/consumers -X PUT -d '
+{
+  "username": "janedoe",
+  "plugins": {
+    "key-auth": {
+      "key": "jane"
+    },
+    "limit-count": {
+      "count": 5,
+      "time_window": 60,
+      "rejected_code": 429,
+      "rejected_msg": "You''ve exceeded your quota, try again later"
+    }
+  }
+}'</code></pre>
+</div>
+</div>
+</div>
+</details>
+<div class="paragraph">
+<p>To test, run the following script:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">for i in {1..6}
+do
+   curl -H 'apikey: jane' localhost:9080/anything
+done</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The first five executions return a bunch of JSON from <code>httpbin</code>, but the sixth one should return a <code>429</code> status code:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-json hljs" data-lang="json">{"error_msg":"Youve exceeded your quota, try again later"}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_consumer_groups">5.4. Consumer groups</h3>
+<div class="paragraph">
+<p>Real-world scenarios rarely assign privileges to a specific user but to a group.
+Hence, a user gets their privileges transitively by belonging to a group.
+It helps tremendously when users moves in to/out from the group.
+To model this, Apache APISIX offers an abstraction called a <code>Consumer Group</code>.
+In this section, we are going to create a <code>Consumer Group</code> with a high limit and move <code>johndoe</code> and <code>janedoe</code> to it.</p>
+</div>
+<div class="paragraph">
+<p>First, let&#8217;s create a <code>Consumer Group</code> with ID <code>1</code> and a limit of 5 requests per minute.
+The <a href="https://apisix.apache.org/docs/apisix/admin-api/#consumer-group-api" target="_blank" rel="noopener">Admin API</a> is your friend.</p>
+</div>
+<details>
+<summary class="title">See the command</summary>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">curl http://127.0.0.1:9180/apisix/admin/consumer_groups/doe -X PUT -d '
+{
+  "plugins": {
+    "limit-count": {
+      "count": 5,
+      "time_window": 60,
+      "rejected_code": 429
+    }
+  }
+}'</code></pre>
+</div>
+</div>
+</div>
+</details>
+<div class="paragraph">
+<p>Then, remove the <code>limit-count</code> plugin from <code>janedoe</code> with the help of the <a href="https://apisix.apache.org/docs/apisix/admin-api/#consumer-api" target="_blank" rel="noopener">Admin API</a> and <strong>add</strong> it to the <code>Consumer Group</code> created.
+Also, add <code>johndoe</code> to the <code>Consumer Group</code>.
+Note that the API doesn&#8217;t offer a <code>PATCH</code> method; you&#8217;ll need to replace the whole object with <code>PUT</code>.</p>
+</div>
+<details>
+<summary class="title">See the command</summary>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">curl http://127.0.0.1:9180/apisix/admin/consumers -X PUT -d '
+{
+  "username": "janedoe",
+  "plugins": {
+    "key-auth": {
+      "key": "jane"
+    }
+  },
+  "group_id": "doe"
+}'
+
+curl http://127.0.0.1:9180/apisix/admin/consumers -X PUT -d '
+{
+  "username": "johndoe",
+  "plugins": {
+    "key-auth": {
+      "key": "john"
+    }
+  },
+  "group_id": "doe"
+}'</code></pre>
+</div>
+</div>
+</div>
+</details>
+<div class="paragraph">
+<p>We can now test with the follow script:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">for i in {1..3}
+do
+   curl -H 'apikey: john' localhost:9080/anything
+   curl -H 'apikey: jane' localhost:9080/anything
+done</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>As above, the 6<sup>th</sup> request should return a <code>429</code> status code.
+However, the limit is shared between both <code>Consumer</code> objects as they belong to the same <code>Consumer Group</code>.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_handling_permissions">6. Handling permissions</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>In the previous sections, we have seen how to set quotas on the number of requests.
+We can also set permissions to allow/disallow specific users/user groups to access our API.
+This is the realm of the <a href="https://apisix.apache.org/docs/apisix/plugins/consumer-restriction/" target="_blank" rel="noopener">consumer-restriction</a> plugin.</p>
+</div>
+<div class="paragraph">
+<p>At the moment, we have a single endpoint.
+Anybody can access it, even though it&#8217;s limited to one request per minute.
+We also have two <code>Consumer</code> objects that belong to the same <code>Consumer Group</code>.</p>
+</div>
+<div class="paragraph">
+<p>In this section, we are going to limit the access to the endpoint to a single <code>Consumer</code> object, then to the whole <code>Consumer Group</code>.
+Read the <a href="https://apisix.apache.org/docs/apisix/plugins/consumer-restriction/" target="_blank" rel="noopener">relevant documentation</a> and limit the acces to the endpoint to <code>johndoe</code>.</p>
+</div>
+<details>
+<summary class="title">See the command</summary>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">curl http://127.0.0.1:9180/apisix/admin/routes/1/plugins/consumer-restriction -X PATCH -d '
+{
+  "whitelist": [ "johndoe" ]
+}'</code></pre>
+</div>
+</div>
+</div>
+</details>
+<div class="paragraph">
+<p>Try to access the endpoint with both <code>Consumer</code> objects:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">curl -H 'apikey: john' localhost:9080/anything
+curl -H 'apikey: jane' localhost:9080/anything</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The first command should work while the second one should return a <code>403</code> status code - the default one.</p>
+</div>
+<div class="paragraph">
+<p>Now, change the restriction from the <code>Consumer</code> object to the <code>Consumer Group</code>.
+Beware, you need to set an additional parameter.
+You can find it in the <a href="https://apisix.apache.org/docs/apisix/plugins/consumer-restriction/" target="_blank" rel="noopener">plugin documentation</a>.</p>
+</div>
+<details>
+<summary class="title">See the command</summary>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">curl http://127.0.0.1:9180/apisix/admin/routes/1/plugins/consumer-restriction -X PATCH -d '
+{
+  "whitelist": [ "johndoe" ]
+}'</code></pre>
+</div>
+</div>
+</div>
+</details>
+<div class="paragraph">
+<p>Try again to access the endpoint:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">curl -H 'apikey: john' localhost:9080/anything
+curl -H 'apikey: jane' localhost:9080/anything</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now, both commands should work because the two <code>Consumer</code> objects belong to the configured <code>Consumer Group</code>.</p>
+</div>
+<div class="paragraph">
+<p>The <code>consumer-restriction</code> plugin is quite powerful.
+You can design your access policy around it.
+Here&#8217;s a simple example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">curl http://localhost:9180/apisix/admin/routes/1/plugins/consumer-restriction -X PUT -d '
+{
+  "type": "consumer_group_id",
+  "allowed_by_methods": [
+    {
+      "user": "users",                            <i class="conum" data-value="1"></i><b>(1)</b>
+      "methods": ["GET"]                          <i class="conum" data-value="1"></i><b>(1)</b>
+    },
+    {
+      "user": "admins",                           <i class="conum" data-value="2"></i><b>(2)</b>
+      "methods": ["GET", "POST", "PUT", "PATCH"]  <i class="conum" data-value="2"></i><b>(2)</b>
+    }
+  ]
+}'</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td><code>Consumer</code> objects that belong to the <code>users</code> <code>Consumer Group</code> can only <code>GET</code></td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td><code>Consumer</code> objects that belong to the <code>admins</code> <code>Consumer Group</code> can do pretty much everything</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+<div class="title">Prefer allowing access than disallowing it</div>
+<div class="paragraph">
+<p>The <code>consumer-restriction</code> plugin offers both a <code>whitelist</code> and a <code>blacklist</code> configuration parameter.
+Security-minded people should always prefer the former to the latter.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="title">Other noteworthy security-related plugins</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://apisix.apache.org/docs/apisix/plugins/uri-blocker" target="_blank" rel="noopener">URI Blocker</a>: Prevents user requests from accessing sensitive URI resources</p>
+</li>
+<li>
+<p><a href="https://apisix.apache.org/docs/apisix/plugins/ip-restriction/" target="_blank" rel="noopener">IP Restriction</a>: Prevents access from some an IP address or a list thereof</p>
+</li>
+<li>
+<p><a href="https://apisix.apache.org/docs/apisix/plugins/cors" target="_blank" rel="noopener">CORS</a>: Allows developers to make cross-domain requests from the browser in a controlled way</p>
+</li>
+<li>
+<p><a href="https://apisix.apache.org/docs/apisix/plugins/csrf" target="_blank" rel="noopener">CSRF</a>: Based on the Double Submit Cookie way, protects your API from CSRF attacks.</p>
+</li>
+</ul>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_disabling_and_removing_a_plugin">7. Disabling and removing a plugin</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Before diving in further, we need to learn how to disable and remove a plugin.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Disabling a plugin means that it&#8217;s still there along, but APISIX won&#8217;t execute it the plugin chain</p>
+</li>
+<li>
+<p>Removing a plugin means that it&#8217;s gone, along with its configuration.
+If you want to add it again, you&#8217;ll need to set its configuration from scratch.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>For learning purposes, having to set the <code>apikey</code> header to authenticate each request is cumbersome.
+Let&#8217;s disable the <code>key-auth</code> plugin we added in the previous section.
+Read the <a href="https://docs.api7.ai/apisix/reference/plugin-common-configurations#_metadisable" target="_blank" rel="noopener">appropriate documentation</a>, then disable the <code>key-auth</code> plugin and remove the <code>consumer-restriction</code> one on the <code>Route</code> with ID <code>1</code>.
+Try to achieve both in one single command.</p>
+</div>
+<details>
+<summary class="title">See the command</summary>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">curl http://localhost:9180/apisix/admin/routes/1/plugins -X PATCH -d ' <i class="conum" data-value="1"></i><b>(1)</b><i class="conum" data-value="2"></i><b>(2)</b>
+{
+  "key-auth": {
+    "_meta": {
+      "disable": true               <i class="conum" data-value="3"></i><b>(3)</b>
+    }
+  }
+}'</code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Path to the `Route&#8217;s plugins</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>As we patch the entire <code>plugins</code> path and we don&#8217;t set <code>consumer-restriction</code>, it&#8217;s removed</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="3"></i><b>3</b></td>
+<td>Set the <code>disable</code> meta parameter to <code>true</code></td>
+</tr>
+</table>
+</div>
+</div>
+</details>
+<div class="paragraph">
+<p>Send a request to the endpoint without an <code>apikey</code> header; it should work because the <code>auth-key</code> plugin is disabled and there is no <code>consumer-restriction</code>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">curl localhost:9080/anything</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_observing_apache_apisix">8. Observing Apache APISIX</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Observability is the process of getting constant insights into a system&#8217;s behavior.
+Observability is based on three pillars:
+metrics, logs, and traces.</p>
+</div>
+<div class="sect2">
+<h3 id="_metrics">8.1. Metrics</h3>
+<div class="paragraph">
+<p>Metrics are a numeric representation of data measured over intervals of time.
+You can aggregate data into buckets of various frequency in your datastore, like Elasticsearch or Grafana, and run queries against it.
+You can also configure alerts that trigger when a condition is met, <em>.e.g.</em>, 10% of <code>500</code> HTTP status code in a 10 seconds interval.</p>
+</div>
+<div class="paragraph right">
+<p><span class="image"><img src="./prometheus-logo.svg" alt="Prometheus logo" width="200" height="200"></span></p>
+</div>
+<div class="paragraph">
+<p>In the metrics space, <a href="https://prometheus.io/" target="_blank" rel="noopener">Prometheus</a> is very widespread.
+Apache APISIX offers a <code>prometheus</code> plugin that exposes metrics in the Prometheus format.
+The existing infrastructure is already ready for this:</p>
+</div>
+<div class="listingblock">
+<div class="title">docker-compose.yml</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">  prometheus:
+    image: prom/prometheus:v2.52.0
+    volumes:
+      - ./conf/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You can try to query the Prometheus metrics:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">curl http://localhost:9091/apisix/prometheus/metrics</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The response should be a long list of metrics in the Prometheus format:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre># HELP apisix_etcd_modify_indexes Etcd modify index for APISIX keys
+# TYPE apisix_etcd_modify_indexes gauge
+apisix_etcd_modify_indexes{key="consumers"} 27
+apisix_etcd_modify_indexes{key="global_rules"} 31
+apisix_etcd_modify_indexes{key="max_modify_index"} 31
+apisix_etcd_modify_indexes{key="prev_index"} 44
+apisix_etcd_modify_indexes{key="protos"} 0
+apisix_etcd_modify_indexes{key="routes"} 30
+apisix_etcd_modify_indexes{key="services"} 0
+apisix_etcd_modify_indexes{key="ssls"} 0
+apisix_etcd_modify_indexes{key="stream_routes"} 0
+apisix_etcd_modify_indexes{key="upstreams"} 15
+apisix_etcd_modify_indexes{key="x_etcd_index"} 44
+# HELP apisix_etcd_reachable Config server etcd reachable from APISIX, 0 is unreachable
+# TYPE apisix_etcd_reachable gauge
+apisix_etcd_reachable 1</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Behind the scene, a Prometheus instance is querying the page at regular intervals.
+This is the existing Prometheus jobs configuration:</p>
+</div>
+<div class="listingblock">
+<div class="title">/etc/prometheus/prometheus.yml</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">global:
+  scrape_interval: 5s     # By default, scrape targets every 15 seconds.
+
+scrape_configs:
+  - job_name: prometheus
+    static_configs:
+      - targets: ["localhost:9090"]
+  - job_name: apisix
+    metrics_path: /apisix/prometheus/metrics
+    static_configs:
+      - targets: ["apisix:9091"]</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>However, we need to add the plugin to our existing <code>Route</code> <strong>and for every other future <code>Route</code> we create</strong>.
+It&#8217;s a possible approach when you have a <em>very</em> limited number of <code>Route</code> objects.
+However, the more <code>Route</code> objects you create, the more you run the risk of forgetting to add <code>prometheus</code> to it.
+Given Murphy&#8217;s Law, it will be the one <code>Route</code> we will need metrics on.</p>
+</div>
+<div class="paragraph">
+<p>For this use case, Apache APISIX offers another abstraction, <code>Global Rule</code>.
+A <code>Global Rule</code> is a regular <code>Plugin</code> with the difference that it&#8217;s applied to <strong>every <code>Route</code> by default</strong>;
+you can still disable it on a per-<code>Route</code> basis.</p>
+</div>
+<div class="paragraph">
+<p>With the help of the <a href="https://apisix.apache.org/docs/apisix/admin-api/#global-rule-api" target="_blank" rel="noopener">Admin API</a>, add the <code>prometheus</code> plugin as <code>Global Rule</code>.</p>
+</div>
+<details>
+<summary class="title">See the command</summary>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">curl http://127.0.0.1:9180/apisix/admin/global_rules/1 -X PUT -d '
+{
+  "plugins": {
+    "prometheus": {}
+  }
+}'</code></pre>
+</div>
+</div>
+</div>
+</details>
+<div class="paragraph">
+<p>Send a couple of requests:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">curl localhost:9080/anything</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>A Grafana instance is already running on the infrastructure.
+Go to <code><a href="http://localhost:3000/" class="bare">http://localhost:3000/</a></code> to access Grafana.
+On the lower right panel, choose the Apache APISIX dashboard.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="./grafana-dashboard-apisix.webp" alt="Choose the Apache APISIX dashboard">
+</div>
+<div class="title">Figure 14. Choose the Apache APISIX dashboard</div>
+</div>
+<div class="paragraph">
+<p>The APISIX dashboard should show up:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="./grafana-dashboard-for-apisix.png" alt="Grafana dashboard for Apache APISIX">
+</div>
+<div class="title">Figure 15. Grafana dashboard for Apache APISIX</div>
+</div>
+<div class="paragraph">
+<p>It&#8217;s the default Apache APISIX Grafana dashboard.
+Grafana users are actively encouraged to customize it to cater to their specific needs.</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="title">Another noteworthy metrics plugin</div>
+<div class="paragraph">
+<p><a href="https://apisix.apache.org/docs/apisix/plugins/datadog/" target="_blank" rel="noopener">datadog</a>: Integrates with <a href="https://www.datadoghq.com/" target="_blank" rel="noopener">Datadog</a></p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_logs">8.2. Logs</h3>
+<div class="paragraph">
+<p>Logs are another common pillar of Observability.
+At another time, we configured our systems to write logs to files.
+When something unexpected happened, we logged to the remote server, browsed through the files, and searched for the time the issue happened.
+It&#8217;s not that easy nowadays;
+with systems becoming more and more distributed, you will need to connect to multiple servers.
+Worse, with containerization, the server might not exist anymore!</p>
+</div>
+<div class="paragraph right">
+<p><span class="image"><img src="./icon_loki.svg" alt="Loki logo" width="200" height="200"></span></p>
+</div>
+<div class="paragraph">
+<p>For these reasons, the current standard is to set up a centralized logging systems.
+In this workshop, I&#8217;ll use Grafana Labs' <a href="https://https://grafana.com/oss/loki/" target="_blank" rel="noopener">Loki</a>.
+As for Prometheus, the existing infrastructure already offers a Loki instance:</p>
+</div>
+<div class="listingblock">
+<div class="title">docker-compose.yml</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">  loki:
+    image: grafana/loki:3.0.0</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We want <strong>all</strong> our requests to send logs to Loki.
+Fortunately, Apache APISIX offers a <a href="https://apisix.apache.org/docs/apisix/plugins/loki-logger/" target="_blank" rel="noopener">loki-logger</a> plugin.</p>
+</div>
+<div class="paragraph">
+<p>It&#8217;s a good time to remember about our the <a href="https://apisix.apache.org/docs/apisix/terminology/global-rule/" target="_blank" rel="noopener">Global Rule</a>.
+We can either create another <code>Global Rule</code> or update the existing one to send logs to Loki.
+Let&#8217;s choose to group all observability plugin in the same rule.
+With the <a href="https://apisix.apache.org/docs/apisix/admin-api/#global-rule-api" target="_blank" rel="noopener">Admin API</a>, add the <code>loki-logger</code> plugin to the <code>Global Rule</code> with ID <code>1</code>.
+In the Docker Compose file, Loki is available at <code><a href="http://loki:3100/" class="bare">http://loki:3100/</a></code>.</p>
+</div>
+<details>
+<summary class="title">See the command</summary>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">curl http://localhost:9180/apisix/admin/routes/1/plugins/loki-logger -X PATCH -d '
+{
+  "endpoint_addrs": ["http://loki:3100"]
+}'</code></pre>
+</div>
+</div>
+</div>
+</details>
+<div class="paragraph">
+<p>Now, we can send a couple of requests:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">for i in {1..10}
+do
+   curl localhost:9080/anything
+done</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>We can now check if everything works as expected.
+Grafana is already configured with the Loki datasource.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Go to <code><a href="http://localhost:3000/" class="bare">http://localhost:3000/</a></code></p>
+</li>
+<li>
+<p>In the list of available dashboards, choose Loki</p>
+<div class="imageblock">
+<div class="content">
+<img src="./grafana-dashboard-loki.webp" alt="Choose the Loki dashboard">
+</div>
+<div class="title">Figure 16. Choose the Loki dashboard</div>
+</div>
+</li>
+<li>
+<p>The already-configured Loki dashboard shows up:</p>
+<div class="imageblock">
+<div class="content">
+<img src="./grafana-dashboard-for-loki.png" alt="Grafana dashboard for Loki">
+</div>
+<div class="title">Figure 17. Grafana dashboard for Loki</div>
+</div>
+<div class="paragraph">
+<p>On the left panel, you can choose one of the log lines and display the full JSON data.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="./grafana-loki-log-context.png" alt="Sample log context">
+</div>
+<div class="title">Figure 18. Sample log context</div>
+</div>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>The Grafana skills of the workshop designers are sorely limited.
+Feel free to improve on the existing dashboard.</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="title">Other noteworthy logging plugins</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://apisix.apache.org/docs/apisix/plugins/kafka-logger/" target="_blank" rel="noopener">kafka-logger</a>: Pushes JSON-formatted logs to <a href="https://kafka.apache.org/" target="_blank" rel="noopener">Apache Kafka</a></p>
+</li>
+<li>
+<p><a href="https://apisix.apache.org/docs/apisix/plugins/clickhouse-logger/" target="_blank" rel="noopener">clickhouse-logger</a>: Pushes logs to the <a href="https://clickhouse.com/" target="_blank" rel="noopener">ClickHouse</a> database</p>
+</li>
+<li>
+<p><a href="https://apisix.apache.org/docs/apisix/plugins/elasticsearch-logger/" target="_blank" rel="noopener">elasticsearch-logger</a>: Pushes logs to <a href="https://www.elastic.co/elasticsearch" target="_blank" rel="noopener">Elasticsearch</a></p>
+</li>
+<li>
+<p><a href="https://apisix.apache.org/docs/apisix/plugins/rocketmq-logger/" target="_blank" rel="noopener">rocketmq-logger</a>: Pushes JSON-formatted logs to a <a href="https://rocketmq.apache.org/" target="_blank" rel="noopener">Apache RocketMQ</a> cluster</p>
+</li>
+</ul>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_traces">8.3. Traces</h3>
+<div class="paragraph right">
+<p><span class="image"><img src="./OpenTelemetry.svg" alt="OpenTelemetry logo" width="200" height="200"></span></p>
+</div>
+<div class="paragraph">
+<p>The third and last pillar of Observability is traces.
+Traces allow you to follow a business request across all components of a distributed system.
+We are going to use <a href="https://opentelemetry.io/" target="_blank" rel="noopener">OpenTelemetry</a> for this.
+OpenTelemetry is the current <em>de facto</em> standard to do observability in general and tracing in particular.</p>
+</div>
+<div class="paragraph">
+<p>Apache APISIX offers an <a href="https://apisix.apache.org/docs/apisix/plugins/opentelemetry/" target="_blank" rel="noopener">OpenTelemetry</a> plugin.</p>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Be aware that the <code>opentelemetry</code> plugin only supports the <strong>tracing</strong> part of OpenTelemetry.
+APISIX supports metrics and logs via their specific backends.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph right">
+<p><span class="image"><img src="./jaeger-logo.svg" alt="Jaeger logo" width="300" height="300"></span></p>
+</div>
+<div class="paragraph">
+<p>The existing infrastructure already offers a Jaeger instance.</p>
+</div>
+<div class="listingblock">
+<div class="title">config.yaml</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">  jaeger:
+    image: jaegertracing/all-in-one:1.57
+    environment:
+      COLLECTOR_OTLP_ENABLED: true
+    ports:
+      - "16686:16686"</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>APISIX is pre-configured to use it.</p>
+</div>
+<div class="listingblock">
+<div class="title">config.yaml</div>
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">  opentelemetry:
+    collector:
+      address: jaeger:4318</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Central to tracing is the notion of <strong>sampling</strong>.
+In production scenario, you don&#8217;t want to trace every single request;
+it would be too many data to handle and store.</p>
+</div>
+<div class="paragraph">
+<p>With the help of the <a href="https://apisix.apache.org/docs/apisix/admin-api/#route-api" target="_blank" rel="noopener">Admin API</a>, add the <code>opentelemetry</code> plugin with a 50/50 sampling rate to the <code>Global Rule</code> with ID <code>1</code>.</p>
+</div>
+<details>
+<summary class="title">See the command</summary>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">curl http://localhost:9180/apisix/admin/routes/1/plugins/opentelemetry -X PATCH -d '
+{
+  "sampler": {
+    "name": "trace_id_ratio",
+    "options": {
+      "fraction": 0.5
+    }
+  }
+}'</code></pre>
+</div>
+</div>
+</div>
+</details>
+<div class="paragraph">
+<p>We can test the setup with a couple of requests:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">for i in {1..10}
+do
+   curl localhost:9080/anything
+done</code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="title">Help wanted</div>
+<div class="paragraph">
+<p>The workshop designers are neither Grafana nor Jaeger experts.
+Feel free to open a PR to replace Jaeger UI with a dedicated Grafana dashboard.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Go to the Jaeger UI at <a href="http://localhost:16686/" class="bare">http://localhost:16686/</a> and select the <code>APISIX</code> service.
+Click the <b class="button">Find Traces</b> button.
+You should see around 5 traces.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="./jaeger-ui.png" alt="Jager UI showing Apache APISIX traces">
+</div>
+<div class="title">Figure 19. Jager UI showing Apache APISIX traces</div>
+</div>
+<div class="paragraph">
+<p>This simple example cannot demo the full powers of distributed tracing.
+Here&#8217;s a screenshot of a single trace across a fully-distributed system comprised of many different components:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="./jaeger-trace-full.png" alt="Jaeger UI showing a single trace across a fully-distributed system">
+</div>
+<div class="title">Figure 20. Jaeger UI showing a single trace across a fully-distributed system</div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="title">Other noteworthy tracing plugins</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://apisix.apache.org/docs/apisix/plugins/zipkin/" target="_blank" rel="noopener">zipkin</a>: Pushes traces to Zipkin logs to <a href="https://github.com/openzipkin/zipkin" target="_blank" rel="noopener">Zipkin</a></p>
+</li>
+<li>
+<p><a href="https://apisix.apache.org/docs/apisix/plugins/skywalking/" target="_blank" rel="noopener">skywalking</a>: Pushes traces to <a href="https://skywalking.apache.org/" target="_blank" rel="noopener">Apache SkyWalking</a></p>
+</li>
+</ul>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_advanced_use_cases">9. Advanced use-cases</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>The previous section taught the basics of Apache APISIX.
+We&#8217;re now ready to go further and tackle more advanced features.
+In this section, we will discover a couple of such features.</p>
+</div>
+<div class="sect2">
+<h3 id="_jwt_authentication">9.1. JWT authentication</h3>
+<div class="paragraph">
+<p>Early in our journey, we <a href="#_authenticating_client_requests">implemented authentication</a> via the <code>key-auth</code> plugin.
+The plugin is good enough to showcase the concepts, but shouldn&#8217;t probably be used in real-world authentication scenarios.
+In this context, we should probably use a more robust approach, such at <abbr title="JSON Web Token">JWT</abbr>.</p>
+</div>
+<div class="quoteblock">
+<blockquote>
+<div class="literalblock">
+<div class="content">
+<pre>JSON Web Token (JWT) is a compact, URL-safe means of representing
+claims to be transferred between two parties.  The claims in a JWT
+are encoded as a JSON object that is used as the payload of a JSON
+Web Signature (JWS) structure or as the plaintext of a JSON Web
+Encryption (JWE) structure, enabling the claims to be digitally
+signed or integrity protected with a Message Authentication Code
+(MAC) and/or encrypted.</pre>
+</div>
+</div>
+</blockquote>
+<div class="attribution">
+&#8212; <a href="https://www.rfc-editor.org/rfc/rfc7519.html" target="_blank" rel="noopener">JSON Web Token (JWT)</a>
+</div>
+</div>
+<div class="paragraph right">
+<p><span class="image"><img src="./jwt-logo.svg" alt="JWT logo" width="200" height="200"></span></p>
+</div>
+<div class="paragraph">
+<p>The <a href="https://apisix.apache.org/docs/apisix/plugins/jwt-auth" target="_blank" rel="noopener">jwt-auth plugin</a> implements the JWT RFC.
+The plugin acts as an issuer and also validates the token on behalf of the API;
+upstream developers do not have to add any code to process the authentication.</p>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s apply JWT to our existing API so that only authenticated consumers can access it.
+Just like for the <code>key-auth</code> plugin, configuring the <code>jwt-auth</code> plugin is a two-step process:
+First, configure the user, then, configure the route.</p>
+</div>
+<div class="paragraph">
+<p>With the help of the <a href="https://apisix.apache.org/docs/apisix/plugins/jwt-auth/" target="_blank" rel="noopener"><code>jwt-auth</code> plugin documentation</a>, add the plugin to the exising <code>johndoe</code> consumer.
+Keep it simple and only set the required attribute.</p>
+</div>
+<details>
+<summary class="title">See the command</summary>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">curl http://localhost:9180/apisix/admin/consumers -X PUT -d '
+{
+    "username": "johndoe",
+    "plugins": {
+        "jwt-auth": {
+            "key": "mykey"
+        }
+    }
+}'</code></pre>
+</div>
+</div>
+</div>
+</details>
+<div class="paragraph">
+<p>We can now add the <code>jwt-auth</code> plugin to our exising <code>Route</code>.</p>
+</div>
+<details>
+<summary class="title">See the command</summary>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">curl http://localhost:9180/apisix/admin/routes/1 -X PATCH -d '
+{
+  "plugins": {
+    "jwt-auth": {}
+  }
+}'</code></pre>
+</div>
+</div>
+</div>
+</details>
+<div class="paragraph">
+<p>Compared to the <code>auth-key</code>, we need an additional step.
+By default, routes in Apache APISIX forward to upstreams.
+The plugin creates a dedicated route for registered users to request a JWT token, which will be passed in later requests to authenticate.
+We must expose this route to users;
+we can achieve this with the <a href="https://apisix.apache.org/docs/apisix/plugins/public-api/" target="_blank" rel="noopener"><code>public-api</code> plugin</a>.</p>
+</div>
+<details>
+<summary class="title">See the command</summary>
+<div class="content">
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">curl http://localhost:9180/apisix/admin/routes -X POST -d '
+{
+    "uri": "/apisix/plugin/jwt/sign",
+    "plugins": {
+        "public-api": {}
+    }
+}'</code></pre>
+</div>
+</div>
+</div>
+</details>
+<div class="paragraph">
+<p>It&#8217;s time to validate our setup.
+We should request a JWT token from the dedicated route.
+For ease of use, we store it in an environment variable for later usage:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">export TOKEN=`curl http://localhost:9080/apisix/plugin/jwt/sign\?key=mykey` <i class="conum" data-value="1"></i><b>(1)</b><i class="conum" data-value="2"></i><b>(2)</b></code></pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>The <code>9080</code> port is the user-facing one</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>We created the key <code>mykey</code> earlier and it&#8217;s bound to the user <code>johndoe</code></td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Then, we can use it to authenticate the request:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">curl -i -X GET http://localhost:9080/anything -H "Authorization: $TOKEN"</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>At this point, we have validated the client&#8217;s identity with JWT.
+try with no token or a wrong token and see what happens.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">curl -i -X GET http://localhost:9080/anything
+curl -i -X GET http://localhost:9080/anything -H "Authorization: foobar"</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><strong>Go further:</strong></p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://docs.api7.ai/hub/jwt-auth" target="_blank" rel="noopener">jwt-auth</a></p>
+</li>
+<li>
+<p><a href="https://www.youtube.com/watch?v=kbELyQIXAsw" target="_blank" rel="noopener">Centralized Authentication with Apache APISIX Plugins</a></p>
+</li>
+</ul>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="title">Other noteworthy authentication plugins</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://apisix.apache.org/docs/apisix/plugins/openid-connect" target="_blank" rel="noopener">openid-connect</a>: Delegates authentication to <a href="https://openid.net/" target="_blank" rel="noopener">OpenID Connect</a></p>
+</li>
+<li>
+<p><a href="https://apisix.apache.org/docs/apisix/plugins/ldap-auth" target="_blank" rel="noopener">ldap-auth</a>: Delegates authentication to an <a href="https://en.wikipedia.org/wiki/Lightweight_Directory_Access_Protocol" target="_blank" rel="noopener">LDAP</a> directory</p>
+</li>
+<li>
+<p><a href="https://apisix.apache.org/docs/apisix/plugins/authz-keycloak" target="_blank" rel="noopener">authz-keycloak</a>: Delegates authentication to a <a href="https://www.keycloak.org/" target="_blank" rel="noopener">Keycloak</a> server</p>
+</li>
+</ul>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Last updated 2024-06-17 17:53:54 UTC
+</div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>
+<script>
+if (!hljs.initHighlighting.called) {
+  hljs.initHighlighting.called = true
+  ;[].slice.call(document.querySelectorAll('pre.highlight > code')).forEach(function (el) { hljs.highlightBlock(el) })
+}
+</script>
+</body>
+</html>
