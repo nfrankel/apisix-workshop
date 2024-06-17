@@ -73,7 +73,7 @@ It should do everything a reverse proxy does, and more, especially in the contex
 
 * This workshops is largely based on https://docs.docker.com/compose/[Docker Compose^] v3.
 You need a way to run https://www.docker.com/[Docker^] and Docker Compose files.
-Docker Dashboard works.
+Docker Desktop works.
 If you want to use something else, please feel free to do so but if something doesn't work because of it, know that it decreases your chances that the instructor can help you with it.
 * We use the https://curl.se/docs/manpage.html[curl^] command for API testing.
 You can also use other tools, such as https://www.postman.com/[Postman^] or similar.
