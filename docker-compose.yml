@@ -41,7 +41,7 @@ services:
     ports:
       - "16686:16686"
   grafana:
-    image: grafana/grafana:11.0.0
+    image: grafana/grafana:11.2.2
     ports:
       - "3000:3000"
     volumes:
