@@ -52,13 +52,13 @@ services:
   httpbin:
     image: kennethreitz/httpbin
   web1:
-    image: nginx:1.26.0-alpine
+    image: nginx:1.27.2-alpine
     volumes:
       - ./upstream/web1.conf:/etc/nginx/nginx.conf
     ports:
       - "9081:80"
   web2:
-    image: nginx:1.26.0-alpine
+    image: nginx:1.27.2-alpine
     volumes:
       - ./upstream/web2.conf:/etc/nginx/nginx.conf
     ports:
