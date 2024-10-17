@@ -33,7 +33,7 @@ services:
     volumes:
       - ./conf/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
   loki:
-    image: grafana/loki:3.0.0
+    image: grafana/loki:3.2.1
   jaeger:
     image: jaegertracing/all-in-one:1.57
     environment:
